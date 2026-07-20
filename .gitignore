@@ -1,0 +1,27 @@
+# -----------
+# Environment
+# Add project artifacts above this line.
+# -----------
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor / agents
+.vscode/
+.cursor/
+.agents/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+credentials.json
