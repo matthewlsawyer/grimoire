@@ -1,84 +1,51 @@
 # grimoire
 
-```
+```text
 ╭───────────────╮
 │  ◈ grimoire   ║
 │  ══✧═════✧══  ║
 │               ║
-|  / ~ > cast   ║
+|  / ~≃> cast   ║
 │               ║
 │  ────┬┼┬────  ║
 │     ✧ ◈ ✧     ║
 ╰≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡╝
 
 A spellbook of small, composable agent skills.
+
++===+===+===+===+===+===+===+===+===+===+===+===+
+
+[/grim-scry](grim-scry/README.md)  ~≃> Distill a repository into a canonical model
+/grim-repo   ~≃> Discover repos and summarize Git state across a workspace
+/grim-weave  ~≃> Reveal relationships between repositories and systems
+/grim-trace  ~≃> Trace a symbol, concept, or service through its relationships
+/grim-adr    ~≃> Capture durable architectural decision records
 ```
 
 ## Axioms
 
-- _At-a-glance_ is a feature
-- _Dead-simple_ beats clever
-- Small, single-responsibility spells
-- Fast over exhaustive
+- *At-a-glance* is a feature
+- *Dead-simple* beats clever
+- Opinionated defaults
+- Small, single-responsibility skills
 - Knowledge first -> viewport second
-- Evidence over inference
-- Agent-orchestrated skill workflows -> think unix `grim-scry && grim-adr`
+- Agentic workflows -> think unix `grim-scry && grim-adr`
 - Shared artifacts live in `<agent-workspace>/.grimoire/`
 
----
+## Examples
 
-## Spellbook
+One directory per skill: `examples/<skill>/`.
 
-- [`grim-scry`](grim-scry/README.md) -> Distill a repository into a high-level canonical understanding.
-- `grim-repo` -> Discover repositories and summarize their Git state across a workspace.
-- `grim-weave` -> Reveal relationships between repositories and systems.
-- `grim-trace` -> Trace a symbol, concept, or service through its surrounding relationships.
-- `grim-adr` -> Capture durable architectural decision records from completed work.
-
----
-
-## Core Architecture
-
-```text
-Repository
-└─▶ Discovery
-   └─▶ Distillation
-       └─▶ Canonical Model -> `<agent-workspace>/.grimoire/scry/<slug>/model.yaml`
-           ├─▶ ASCII (reserved sibling: `ascii.md`)
-           ├─▶ Markdown
-           ├─▶ Mermaid
-           ├─▶ GraphViz
-           └─▶ Future renderers...
-```
-
----
-
-## Design Principles
-
-- Build the knowledge, not the view.
-- Keep the model simple enough for both humans and agents.
-- Prefer composable artifacts over complex integrations.
-- Favor opinionated defaults over endless configuration.
-- Ship small spells that solve one problem well.
-
----
+| Skill | Example |
+| --- | --- |
+| [grim-scry](grim-scry/README.md) | [vercel/next.js](examples/grim-scry/example-run.md) (Composer 2.5) |
 
 ## Roadmap
 
-### Foundation
-- [x] `grim-scry`
 - [x] Canonical YAML schema
-- [x] ASCII renderer
-
-### Discovery
-- [ ] `grim-repo`
-- [ ] `grim-weave`
-- [ ] `grim-trace`
-
-### Knowledge
-- [ ] `grim-adr`
-
----
+- [x] ASCII renderer (chat; `ascii.md` reserved)
+- [ ] Additional viewports (Markdown, Mermaid, GraphViz)
+- [ ] Ship planned spells in Spellbook above
 
 ## Install
 

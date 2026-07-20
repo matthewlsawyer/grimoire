@@ -12,10 +12,23 @@ Given a repository or workspace, distill a small canonical model and show it thr
    - Directory hierarchy
    - Conceptual hierarchy
    - Workflow hierarchy
-   - `repository.summary` + short `observations`
+   - Summary + observations
    - Link to the written `model.yaml`
 
 Knowledge first -> viewport second. The YAML is the source of truth; ASCII is a projection.
+
+## Core Architecture
+
+```text
+Target workspace
+└─▶ Discovery & Distillation
+    └─▶ Canonical Model -▶ `<agent-workspace>/.grimoire/scry/<slug>/model.yaml`
+        ├─▶ ASCII (reserved sibling: `ascii.md`)
+        ├─▶ Markdown
+        ├─▶ Mermaid
+        ├─▶ GraphViz
+        └─▶ Future renderers...
+```
 
 ## Files
 

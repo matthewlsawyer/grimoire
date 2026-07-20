@@ -3,36 +3,43 @@
 | Field | Value |
 | --- | --- |
 | Target | [vercel/next.js](https://github.com/vercel/next.js) |
-| Model | GPT-5.4 Nano Medium |
+| Model | Composer 2.5 |
 | workspace_data | [example-workspace-data.yaml](example-workspace-data.yaml) |
 
-Chat-facing output from a scry of that repo. Lenses render from the sibling workspace_data example; model not re-embedded here.
+Chat-facing output from a scry of that repo (run in Composer 2.5). Lenses render from the sibling workspace_data example; model not re-embedded here.
 
 ## Directory hierarchy
 
 ```text
 next.js/
-├─ packages/ -> Published npm packages (including core `next`)
+├─ packages/ -> Published npm packages (core `next` and siblings)
+│  └─ next/
 ├─ turbopack/ -> Turbopack bundler (Rust) subtree
-├─ crates/ -> Rust crates (SWC bindings)
-├─ test/ -> Test suites across modes
+├─ rspack/ -> Rspack bundler integration (alternate)
+├─ crates/ -> Rust crates for Next.js / SWC bindings
+├─ test/ -> Integration and mode-matrix test suites
 ├─ examples/ -> Example Next.js applications
-├─ docs/ -> Documentation
-└─ scripts/ -> Build and maintenance scripts
+├─ docs/ -> Product documentation (app/pages/architecture)
+├─ scripts/ -> Build and maintenance scripts
+├─ .agents/skills/ -> Contributor agent skills
+└─ skills/ -> Product adoption agent skills
 ```
 
 ## Conceptual hierarchy
 
 ```text
 next.js
-└─ Monorepo -> pnpm workspaces that ship Next.js and related packages
-   ├─ Core Next.js package -> The main `next` framework package (and its CLI entrypoints)
-   │  └─ packages/ -> Published npm packages (including core `next`)
-   ├─ Bundler & runtime tooling -> Turbopack (default) plus Rust-based JS tooling
-   │  └─ turbopack/ -> Turbopack bundler (Rust) subtree
-   └─ Build / Dev / Test workflow -> Documented dev, build, and test pipelines with mode-specific commands
-      ├─ scripts/ -> Build and maintenance scripts
-      └─ test/ -> Test suites across modes
+└─ Monorepo -> pnpm workspaces plus Cargo workspace shipping Next.js
+   ├─ Core Next.js package -> Main `next` framework and CLI entrypoints
+   │  └─ next/
+   ├─ Bundler tooling -> Turbopack default; Webpack and Rspack still selectable
+   │  ├─ turbopack/
+   │  └─ rspack/
+   ├─ Native / SWC layer -> Rust crates and NAPI bindings behind transforms
+   │  └─ crates/
+   └─ Dev / build / test loop -> Watch build, mode-specific tests, full bootstrap builds
+      ├─ scripts/
+      └─ test/
 ```
 
 ## Workflow hierarchy
@@ -40,23 +47,27 @@ next.js
 ```text
 next.js
 ├─ AGENTS.md
-│  ├─ uses ─▶ dev (watch): `pnpm --filter=next dev`
-│  ├─ uses ─▶ build-all: `pnpm build-all`
-│  └─ uses ─▶ test-dev-turbo: `pnpm test-dev-turbo test/path/to/test.ts`
-├─ `pnpm --filter=next dev` ─▶ next dev server (packages/next/src/cli/next-dev.ts)
-├─ `pnpm build-all` ─▶ next build (packages/next/src/cli/next-build.ts)
-├─ `pnpm test-dev-turbo test/path/to/test.ts` (depends on `pnpm --filter=next dev`) ─▶ next dev server (packages/next/src/cli/next-dev.ts)
-└─ .github/workflows/build_and_test.yml
+│  ├─▶ pnpm --filter=next dev
+│  │  └─▶ next-dev
+│  ├─▶ pnpm build-all
+│  │  └─▶ next-build
+│  └─▶ pnpm test-dev-turbo
+│     ├─▶ next-dev
+│     └─ depends_on -> pnpm --filter=next dev
+└─ build_and_test (.github/workflows/build_and_test.yml)
+   └─▶ pnpm build-all
+      └─▶ next-build
 ```
 
 ## Summary
 
-A pnpm monorepo for the Next.js framework and related packages, including the core `next` package, the Turbopack bundler, Rust/SWC bindings, test suites, examples, and build/maintenance scripts.
+A pnpm + Cargo monorepo for the Next.js framework: core `next` package, Turbopack (default bundler), Rust/SWC bindings, tests, examples, docs, and contributor agent skills / CI automation.
 
 ## Observations
 
-- `AGENTS.md` documents the monorepo layout and the core CLI entrypoints for dev/build/start.
-- The root `package.json` scripts expose mode-specific commands (e.g. `test-dev-turbo`, `test-start-*`) and `build-all` pipelines.
-- Turbopack is called out as the default bundler for both `next dev` and `next build`.
-- The workflow surface is centralized around `packages/next/src/cli/` entrypoints and scripts in `package.json` / `scripts/`.
-- CI is configured via `.github/workflows/build_and_test.yml` (build + test automation).
+- AGENTS.md is the primary contributor map; CLAUDE.md symlinks to it.
+- Turbopack is the default bundler for `next dev` and `next build`; Webpack/Rspack remain selectable.
+- Core CLI lives under `packages/next/src/cli/` (`next-dev`, `next-build`, `next-start`).
+- Dev loop favors `pnpm --filter=next dev` plus mode-specific `test-*-turbo|webpack|rspack` scripts.
+- Dual skill surfaces: `.agents/skills/` (contributor) and root `skills/` (product adoption).
+- CI hub workflow is `.github/workflows/build_and_test.yml` on canary push and PRs.
