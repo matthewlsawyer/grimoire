@@ -1,17 +1,26 @@
 version: 1
+
 repository:
   name: next.js
-  root: .
+  root: "."
   summary: >
-    A pnpm monorepo for the Next.js framework and related packages, including the core `next` package,
-    the Turbopack bundler, Rust/SWC bindings, test suites, examples, and build/maintenance scripts.
+    A pnpm + Cargo monorepo for the Next.js framework: core `next` package,
+    Turbopack (default bundler), Rust/SWC bindings, tests, examples, docs,
+    and contributor agent skills / CI automation.
+
 entities:
-  # Directories
+
   - id: dir.packages
     kind: directory
     name: packages/
     path: packages/
-    purpose: Published npm packages (including core `next`)
+    purpose: Published npm packages (core `next` and siblings)
+
+  - id: dir.packages-next
+    kind: directory
+    name: next/
+    path: packages/next/
+    purpose: Core Next.js framework package
 
   - id: dir.turbopack
     kind: directory
@@ -19,17 +28,23 @@ entities:
     path: turbopack/
     purpose: Turbopack bundler (Rust) subtree
 
+  - id: dir.rspack
+    kind: directory
+    name: rspack/
+    path: rspack/
+    purpose: Rspack bundler integration (alternate)
+
   - id: dir.crates
     kind: directory
     name: crates/
     path: crates/
-    purpose: Rust crates (SWC bindings)
+    purpose: Rust crates for Next.js / SWC bindings
 
   - id: dir.test
     kind: directory
     name: test/
     path: test/
-    purpose: Test suites across modes
+    purpose: Integration and mode-matrix test suites
 
   - id: dir.examples
     kind: directory
@@ -41,7 +56,7 @@ entities:
     kind: directory
     name: docs/
     path: docs/
-    purpose: Documentation
+    purpose: Product documentation (app/pages/architecture)
 
   - id: dir.scripts
     kind: directory
@@ -49,47 +64,61 @@ entities:
     path: scripts/
     purpose: Build and maintenance scripts
 
-  # Concepts
+  - id: dir.agents-skills
+    kind: directory
+    name: .agents/skills/
+    path: .agents/skills/
+    purpose: Contributor agent skills
+
+  - id: dir.skills
+    kind: directory
+    name: skills/
+    path: skills/
+    purpose: Product adoption agent skills
+
   - id: concept.monorepo
     kind: concept
     name: Monorepo
-    description: pnpm workspaces that ship Next.js and related packages
+    description: pnpm workspaces plus Cargo workspace shipping Next.js
 
   - id: concept.core-next
     kind: concept
     name: Core Next.js package
-    description: The main `next` framework package (and its CLI entrypoints)
+    description: Main `next` framework and CLI entrypoints
 
   - id: concept.bundler
     kind: concept
-    name: Bundler & runtime tooling
-    description: Turbopack (default) plus Rust-based JS tooling
+    name: Bundler tooling
+    description: Turbopack default; Webpack and Rspack still selectable
 
-  - id: concept.build-workflow
+  - id: concept.native
     kind: concept
-    name: Build / Dev / Test workflow
-    description: Documented dev, build, and test pipelines with mode-specific commands
+    name: Native / SWC layer
+    description: Rust crates and NAPI bindings behind transforms
 
-  # Entrypoints
+  - id: concept.dev-loop
+    kind: concept
+    name: Dev / build / test loop
+    description: Watch build, mode-specific tests, full bootstrap builds
+
   - id: entry.next-dev
     kind: entrypoint
-    name: next dev server
+    name: next-dev
     path: packages/next/src/cli/next-dev.ts
 
   - id: entry.next-build
     kind: entrypoint
-    name: next build
+    name: next-build
     path: packages/next/src/cli/next-build.ts
 
   - id: entry.next-start
     kind: entrypoint
-    name: next start
+    name: next-start
     path: packages/next/src/cli/next-start.ts
 
-  # Scripts (workflow surface)
   - id: script.dev
     kind: script
-    name: dev (watch)
+    name: next watch build
     command: pnpm --filter=next dev
 
   - id: script.build-all
@@ -100,27 +129,29 @@ entities:
   - id: script.test-dev-turbo
     kind: script
     name: test-dev-turbo
-    command: pnpm test-dev-turbo test/path/to/test.ts
+    command: pnpm test-dev-turbo
 
-  # Instructions / API surfaces
   - id: instruction.agents
     kind: instruction
-    name: next.js development guide
+    name: AGENTS.md
     path: AGENTS.md
 
   - id: instruction.ci-build-test
     kind: instruction
-    name: CI build & test workflow
+    name: build_and_test
     path: .github/workflows/build_and_test.yml
 
 relationships:
-  # Directory hierarchy
+
   - type: contains
     from: repository
     to: dir.packages
   - type: contains
     from: repository
     to: dir.turbopack
+  - type: contains
+    from: repository
+    to: dir.rspack
   - type: contains
     from: repository
     to: dir.crates
@@ -136,11 +167,16 @@ relationships:
   - type: contains
     from: repository
     to: dir.scripts
-
-  # Conceptual hierarchy (concepts as parents)
   - type: contains
     from: repository
-    to: concept.monorepo
+    to: dir.agents-skills
+  - type: contains
+    from: repository
+    to: dir.skills
+  - type: contains
+    from: dir.packages
+    to: dir.packages-next
+
   - type: contains
     from: concept.monorepo
     to: concept.core-next
@@ -149,29 +185,36 @@ relationships:
     to: concept.bundler
   - type: contains
     from: concept.monorepo
-    to: concept.build-workflow
+    to: concept.native
+  - type: contains
+    from: concept.monorepo
+    to: concept.dev-loop
 
   - type: implements
-    from: dir.packages
+    from: dir.packages-next
     to: concept.core-next
   - type: implements
     from: dir.turbopack
     to: concept.bundler
   - type: implements
+    from: dir.rspack
+    to: concept.bundler
+  - type: implements
+    from: dir.crates
+    to: concept.native
+  - type: implements
     from: dir.scripts
-    to: concept.build-workflow
+    to: concept.dev-loop
   - type: implements
     from: dir.test
-    to: concept.build-workflow
+    to: concept.dev-loop
 
-  # Workflow surface (entrypoints/scripts/instructions)
   - type: contains
     from: repository
     to: instruction.agents
   - type: contains
     from: repository
     to: instruction.ci-build-test
-
   - type: contains
     from: repository
     to: script.dev
@@ -181,7 +224,6 @@ relationships:
   - type: contains
     from: repository
     to: script.test-dev-turbo
-
   - type: contains
     from: repository
     to: entry.next-dev
@@ -201,6 +243,9 @@ relationships:
   - type: uses
     from: instruction.agents
     to: script.test-dev-turbo
+  - type: uses
+    from: instruction.ci-build-test
+    to: script.build-all
 
   - type: invokes
     from: script.dev
@@ -216,11 +261,12 @@ relationships:
     to: script.dev
 
 evidence:
-  # Concepts (directories omit evidence - path is existence)
+
   - entity: concept.monorepo
     sources:
       - AGENTS.md
-      - readme.md
+      - pnpm-workspace.yaml
+      - Cargo.toml
   - entity: concept.core-next
     sources:
       - AGENTS.md
@@ -229,12 +275,17 @@ evidence:
     sources:
       - AGENTS.md
       - turbopack/
-  - entity: concept.build-workflow
+      - rspack/
+  - entity: concept.native
+    sources:
+      - AGENTS.md
+      - crates/
+      - Cargo.toml
+  - entity: concept.dev-loop
     sources:
       - AGENTS.md
       - package.json
 
-  # Entrypoints
   - entity: entry.next-dev
     sources:
       - packages/next/src/cli/next-dev.ts
@@ -245,7 +296,6 @@ evidence:
     sources:
       - packages/next/src/cli/next-start.ts
 
-  # Scripts
   - entity: script.dev
     sources:
       - package.json
@@ -259,7 +309,6 @@ evidence:
       - package.json
       - AGENTS.md
 
-  # Instructions
   - entity: instruction.agents
     sources:
       - AGENTS.md
@@ -268,9 +317,9 @@ evidence:
       - .github/workflows/build_and_test.yml
 
 observations:
-  - `AGENTS.md` documents the monorepo layout and the core CLI entrypoints for dev/build/start.
-  - The root `package.json` scripts expose mode-specific commands (e.g. `test-dev-turbo`, `test-start-*`) and `build-all` pipelines.
-  - Turbopack is called out as the default bundler for both `next dev` and `next build`.
-  - The workflow surface is centralized around `packages/next/src/cli/` entrypoints and scripts in `package.json` / `scripts/`.
-  - CI is configured via `.github/workflows/build_and_test.yml` (build + test automation).
-
+  - AGENTS.md is the primary contributor map; CLAUDE.md symlinks to it.
+  - Turbopack is the default bundler for `next dev` and `next build`; Webpack/Rspack remain selectable.
+  - Core CLI lives under `packages/next/src/cli/` (`next-dev`, `next-build`, `next-start`).
+  - Dev loop favors `pnpm --filter=next dev` plus mode-specific `test-*-turbo|webpack|rspack` scripts.
+  - Dual skill surfaces: `.agents/skills/` (contributor) and root `skills/` (product adoption).
+  - CI hub workflow is `.github/workflows/build_and_test.yml` on canary push and PRs.
