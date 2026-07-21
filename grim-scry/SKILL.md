@@ -10,7 +10,7 @@ _Reveal the shape of a system._
 
 ## Workflow
 
-Default depth `N = 4`.
+Default depth `N = 3`.
 
 1. Resolve target (cwd / named repo; ask if unclear)
 2. Dir reveal (structure) - first pass:
@@ -56,7 +56,7 @@ Do not re-embed the whole model in chat unless asked.
 
 - Two discovery steps only: dir reveal to `maxdepth N` then doc seed+crawl on that tree. No deep code intelligence.
 - Doc hunt is limited to the revealed dirs (and target root); do not recursive-find READMEs across the whole repo.
-- Doc hunt reads README / AGENTS / index seeds only - no follow-up discovery.
+- Doc hunts seeds only - no follow-up discovery.
 - Ignore plumbing, boilerplate, generated, and vendor paths.
 - Do not invent directory purposes for reveal-only dirs.
 - Observations are short bullets, not a second essay.
@@ -89,7 +89,7 @@ Filter the workspace_data for:
 Filter the workspace_data for:
 - entity:
   - `kind: concept`
-  - `kind: directory` - when linked via `implements`
+  - `kind: directory`
 - relationship:
   - `type: uses`
   - `type: invokes`

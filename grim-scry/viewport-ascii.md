@@ -28,6 +28,7 @@ Rules:
 - If a cycle appears, break it for rendering; do not loop forever.
 - If a node has multiple parents, choose one primary parent for the tree.
 - Do not invent nodes or edges that are not in `workspace_data`.
+- Treat below examples as north stars.
 
 ## Directory lens renderer
 
@@ -49,13 +50,25 @@ Mapping:
 Example:
 
 ```text
-root/ ◀─ short note
-├─ foo1/ ◀─ short note
-├─ foo2/
-│  ├─ bar1/
-│  └─ bar2/
-└─ foo3/
-   └─ bar1/
+next.js/ ◀─ Next.js React framework
+├─ packages/ ◀─ Published npm packages (core `next` and siblings)
+│  └─ next/
+├─ turbopack/ ◀─ Turbopack bundler (Rust) subtree
+├─ crates/ ◀─ Rust crates for Next.js SWC bindings
+├─ rspack/
+├─ test/ ◀─ All test suites
+│  ├─ e2e/
+│  ├─ development/
+│  ├─ production/
+│  └─ unit/
+├─ examples/ ◀─ Example Next.js applications
+├─ docs/ ◀─ Documentation
+│  ├─ 01-app/
+│  ├─ 02-pages/
+│  ├─ 03-architecture/
+│  └─ 04-community/
+├─ scripts/ ◀─ Build and maintenance scripts
+└─ evals/ ◀─ Agent evals for Next.js
 ```
 
 ## Conceptual lens renderer
@@ -79,22 +92,22 @@ Mapping:
 - Annotation comes from `description` as `◀─ <description>`.
 - Implementer labels may be `path` when they are directories.
 - Prefer concept-first trees over filesystem trees.
+- If concepts do not form a single tree, render sibling concept roots under the repository/system name.
 
 Example:
 
 ```text
-Foo ◀─ short note
-└─ Bar ◀─ short note
-  ├─ bar/
-  └─ Baz ◀─ short note
-     └─ bar/baz/
-
-Qux
-└─ Quux ◀─ short note
-
-Scorge
-├─ sponge/
-└─ Spangle ◀─ short note
+Next.js framework ◀─ Main next npm package; dev, build, and production server
+├─ packages/next/
+├─ Bundler tooling ◀─ Turbopack default; Webpack and Rspack still selectable
+│  ├─ turbopack/
+│  └─ rspack/
+├─ Native / SWC layer ◀─ Rust crates and NAPI bindings behind transforms
+|  ├─ packages/next-swc/
+|  └─ crates/
+└─ Dev / build / test loop -> Watch build, mode-specific tests, full bootstrap builds
+  ├─ scripts/
+  └─ test/
 ```
 
 ## Workflow lens renderer
@@ -121,29 +134,39 @@ Mapping:
 - Prefer to group related flows by usage/domain/purpose of the invocations therein -> named workflows.
 - Use `├─▶` / `└─▶` / `─▶` for invocation and dependency direction.
 - Use `◀─` for notes for invocation and dependency direction.
+- If nodes do not form a single tree, render sibling workflow roots under `repository.name`.
 
 Example:
 
 ```text
-CLI
-├─▶ foo --cli ◀─ short note
-└─▶ bar.sh
-
-Local development
-├─▶ foo ◀─ short note
-│  ├─▶ foo.sh
-│  └─▶ foo pr ◀─ PR triage
-└─▶ bar build
-   └─▶ bar build-all
-
-Testing ◀─ short note
-├─▶ baz test-e2e
-└─▶ baz test-unit
-
-Specialized instructions
-├─ .github/build.md ◀─ short note
-├─ qux/qux.md
-└─ AGENTS.md ◀─ primary instruction
+next.js
+├─ CLI
+│  ├─▶ next dev
+│  ├─▶ next start
+│  └─▶ next build
+├─ Local development
+│  ├─▶ pnpm --filter=next dev ◀─ watch rebuild while iterating
+│  └─▶ pnpm --filter=next build ◀─ core package only
+├─ Build
+│  ├─▶ pnpm build
+│  └─▶ pnpm build-all ◀─ JS and Rust; use after branch switch
+├─ Testing ◀─ mode- and bundler-specific
+│  ├─▶ pnpm test-dev-turbo ◀─ dev mode, Turbopack (default)
+│  │  └─▶ pnpm --filter=next build
+│  ├─▶ pnpm test-dev-webpack
+│  ├─▶ pnpm test-start-turbo ◀─ prod build+start
+│  │  └─▶ pnpm --filter=next build
+│  ├─▶ pnpm test-start-webpack
+│  ├─▶ pnpm test-unit ◀─ fast, no browser
+│  └─▶ pnpm new-test ◀─ generate test fixtures
+├─ Quality
+│  ├─▶ pnpm lint
+│  └─▶ pnpm types
+├─ PR triage
+│  └─▶ node scripts/pr-status.js
+│     └─▶ .agents/skills/pr-status-triage/SKILL.md ◀─ CI failure workflow
+└─ Specialized instructions
+   └─▶ AGENTS.md ◀─ primary instruction
 ```
 
 ## Output constraints
