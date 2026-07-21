@@ -15,7 +15,7 @@ A spellbook of small, composable agent skills.
 
 +===+===+===+===+===+===+===+===+===+===+===+===+
 
-[/grim-scry](grim-scry/README.md)  ~≃> Distill a repository into a canonical model
+/grim-scry  ~≃> Distill a repository into a canonical model
 /grim-repo   ~≃> Discover repos and summarize Git state across a workspace
 /grim-weave  ~≃> Reveal relationships between repositories and systems
 /grim-trace  ~≃> Trace a symbol, concept, or service through its relationships
@@ -36,15 +36,16 @@ A spellbook of small, composable agent skills.
 
 One directory per skill: `examples/<skill>/`.
 
-| Skill | Example |
+| Skill | Examples |
 | --- | --- |
-| [grim-scry](grim-scry/README.md) | [vercel/next.js](examples/grim-scry/example-run.md) (Composer 2.5) |
+| [grim-scry](grim-scry/README.md) | [tailscale](examples/grim-scry/tailscale-output.md) (Composer 2.5, Cursor) |
 
 ## Roadmap
 
 - [x] Canonical YAML schema
 - [x] ASCII viewport
-- [ ] Ship planned spells in Spellbook above
+- [x] grim-scry
+- [ ] grim-repo, grim-weave, grim-trace, grim-adr
 
 ## Install
 
