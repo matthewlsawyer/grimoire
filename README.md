@@ -43,8 +43,7 @@ One directory per skill: `examples/<skill>/`.
 ## Roadmap
 
 - [x] Canonical YAML schema
-- [x] ASCII renderer (chat; `ascii.md` reserved)
-- [ ] Additional viewports (Markdown, Mermaid, GraphViz)
+- [x] ASCII viewport
 - [ ] Ship planned spells in Spellbook above
 
 ## Install
