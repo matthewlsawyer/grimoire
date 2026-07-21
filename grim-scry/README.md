@@ -6,10 +6,12 @@ Given a repository or workspace, distill a small canonical model and show it thr
 
 ## What it does
 
-1. Dir reveal: `find -P . -mindepth 1 -maxdepth 3 -type d` for structure (first pass). Honors `.gitignore`; skips `.git`, plumbing, vendor, and generated paths. Avoids symlinks.
-2. Doc seed: hunt README / `AGENTS.md` / index files on the revealed dirs only; read seeds and extract meaning. No SKILL/workflow/source follow-ups.
-3. Writes `workspace_data` to `<agent-workspace>/.grimoire/scry/<slug>/model.yaml`.
-4. Emits chat-facing output:
+1. Resolve target (cwd or named path).
+2. Dir reveal (structure): `find -P . -mindepth 1 -maxdepth "$N"` (default `N = 3`). Honors `.gitignore`; skips `.git`, plumbing, vendor, and generated paths. Avoids symlinks.
+3. Doc seed extract (meaning): among the target root and dirs already revealed, hunt README, `AGENTS.md` / `CLAUDE.md`, rules (e.g. `rule-name.mdc`), and index files (`index.md`, `index.yaml`, or similar) only. Read seeds; extract meaning. No follow-up discovery.
+4. Distill to a small salient set. Set `directory.purpose` only when docs named it.
+5. Write `workspace_data` to `<agent-workspace>/.grimoire/scry/<slug>/model.yaml`.
+6. Emit chat-facing output:
    - Directory hierarchy
    - Conceptual hierarchy
    - Workflow hierarchy
@@ -17,6 +19,8 @@ Given a repository or workspace, distill a small canonical model and show it thr
    - Link to the written `model.yaml`
 
 Knowledge first -> viewport second. The YAML is the source of truth; the ASCII viewport is the projection.
+
+Same-slug re-run: `rm -rf` the whole `.grimoire/scry/<slug>/` dir, then recreate and write `model.yaml`. Do not patch or merge prior runs.
 
 ## Model vocabulary
 
@@ -33,7 +37,7 @@ Knowledge first -> viewport second. The YAML is the source of truth; the ASCII v
 | `config` | A named configuration artifact | Conceptual or workflow implementer when linked |
 | `instruction` | An instruction or guidance surface | Workflow hierarchy API surface |
 
-Every entity requires an `id`, `kind`, and `name`. The remaining fields depend on the kind - for example, directories use `path`, concepts use `description`, and scripts use `command`.
+Every entity requires an `id`, `kind`, and `name`. The remaining fields depend on the kind - for example, directories use `path` and optional `purpose`, concepts use `description`, and scripts use `command`.
 
 ### Relationship types
 
@@ -54,8 +58,8 @@ Lenses are filters over the same model, not separate graphs. Each hierarchy choo
 | Lens | Entity filter | Relationship filter | Shows |
 | --- | --- | --- | --- |
 | Directory | `directory` | `contains` | Filesystem structure and documented directory purpose |
-| Conceptual | `concept` plus linked implementers | `contains`, `implements` | Ideas, their sub-concepts, and concrete realizations |
-| Workflow | `entrypoint`, `script`, `instruction` | `invokes`, `uses`, `depends_on` | Actions, guidance surfaces, and execution/dependency flow |
+| Conceptual | `concept`, `directory` (via `implements`) | `uses`, `invokes`, `implements` | Ideas, linked implementers, and concept flow |
+| Workflow | `script`, `concept`, `entrypoint`, `instruction` | `uses`, `invokes`, `contains`, `implements`, `depends_on` | Actions, guidance surfaces, and execution/dependency flow |
 
 The same entity can appear in more than one lens when its kind and edges qualify. For example, a directory can implement a concept in the conceptual lens, while a script can be invoked by an entrypoint in the workflow lens. `config` entities are available to a lens when linked, but are not required in every viewport.
 
@@ -63,8 +67,8 @@ The same entity can appear in more than one lens when its kind and edges qualify
 
 ```text
 Target workspace
-└─▶ Discovery & Distillation
-    └─▶ Canonical Model -▶ `<agent-workspace>/.grimoire/scry/<slug>/model.yaml`
+└─▶ Discovery (dir reveal + doc seed)
+    └─▶ model.yaml  ◀─ <agent-workspace>/.grimoire/scry/<slug>/
         ├─▶ ASCII (default)
         ├─▶ Plaintext
         ├─▶ Markdown
@@ -72,6 +76,8 @@ Target workspace
         ├─▶ GraphViz
         └─▶ Future renderers...
 ```
+
+Additional viewports (Markdown, Mermaid, GraphViz, ...) are planned; only ASCII is shipped today.
 
 ## Files
 
