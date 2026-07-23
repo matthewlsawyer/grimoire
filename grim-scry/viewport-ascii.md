@@ -106,8 +106,8 @@ Next.js framework ◀─ Main next npm package; dev, build, and production serve
 |  ├─ packages/next-swc/
 |  └─ crates/
 └─ Dev / build / test loop -> Watch build, mode-specific tests, full bootstrap builds
-  ├─ scripts/
-  └─ test/
+   ├─ scripts/
+   └─ test/
 ```
 
 ## Workflow lens renderer
@@ -152,10 +152,10 @@ next.js
 │  └─▶ pnpm build-all ◀─ JS and Rust; use after branch switch
 ├─ Testing ◀─ mode- and bundler-specific
 │  ├─▶ pnpm test-dev-turbo ◀─ dev mode, Turbopack (default)
-│  │  └─▶ pnpm --filter=next build
+│  │   └─▶ pnpm --filter=next build
 │  ├─▶ pnpm test-dev-webpack
 │  ├─▶ pnpm test-start-turbo ◀─ prod build+start
-│  │  └─▶ pnpm --filter=next build
+│  │   └─▶ pnpm --filter=next build
 │  ├─▶ pnpm test-start-webpack
 │  ├─▶ pnpm test-unit ◀─ fast, no browser
 │  └─▶ pnpm new-test ◀─ generate test fixtures
