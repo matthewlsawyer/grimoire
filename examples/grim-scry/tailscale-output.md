@@ -5,11 +5,8 @@
 | Target | [tailscale](https://github.com/tailscale/tailscale) |
 | Model | Composer 2.5 |
 | Ran with | Cursor |
-| workspace_data | [tailscale-model.yaml](tailscale-model.yaml) |
 
 Chat-facing output from a scry of the [tailscale](https://github.com/tailscale/tailscale) repository.
-
-Lenses rendered from the sibling workspace_data [tailscale-model.yaml](tailscale-model.yaml).
 
 ## Directory hierarchy
 

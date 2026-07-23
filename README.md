@@ -15,40 +15,37 @@ A spellbook of small, composable agent skills.
 
 +===+===+===+===+===+===+===+===+===+===+===+===+
 
-/grim-scry   ~≃> Distill a repository into an at-a-glance lense
-/grim-repo   ~≃> Discover repos and summarize Git state across a workspace
-/grim-weave  ~≃> Reveal relationships between repositories and systems
-/grim-trace  ~≃> Trace a symbol, concept, or service through its relationships
+> *At-a-glance* is a feature
+
++===+===+===+===+===+===+===+===+===+===+===+===+
+
+/grim-scry   ~≃> Reveal the shape of a project
+/grim-repo   ~≃> Manage repos across workspace
+/grim-weave  ~≃> Reveal relationships between systems
+/grim-trace  ~≃> Trace a symbol or concept through workspace
 /grim-adr    ~≃> Capture durable architectural decision records
 ```
 
-| Skill | Examples |
+## Skills
+
+| Spell | Purpose |
 | --- | --- |
 | [grim-scry](grim-scry/README.md) | Project at-a-glance understanding |
 
-## Axioms
-
-- *At-a-glance* is a feature
-- *Dead-simple* beats clever
-- Opinionated defaults
-- Small, single-responsibility skills
-- Knowledge first -> viewport second
-- Agentic workflows -> skills work together
-- Shared artifacts live in `<agent-workspace>/.grimoire/`
-
 ## Examples
 
-One directory per skill: `examples/<skill>/`.
+One directory per spell: `examples/<spell>/`. One file per run.
 
-| Skill | Examples |
-| --- | --- |
-| [grim-scry](grim-scry/README.md) | [tailscale](examples/grim-scry/tailscale-output.md) (Composer 2.5, Cursor) |
+```text
+examples/
+└─ grim-scry/
+   ├─ [tailscale](examples/grim-scry/tailscale-output.md) ◀─ Composer 2.5, Cursor
+   └─ [kubernetes](examples/grim-scry/kubernetes-output.md) ◀─ Composer 2.5, Cursor
+```
 
 ## Roadmap
 
-- [x] Canonical YAML schema
-- [x] ASCII viewport
-- [x] grim-scry
+- [x] grim-scry (chat-only ASCII lenses)
 - [ ] grim-repo, grim-weave, grim-trace, grim-adr
 
 ## Install
