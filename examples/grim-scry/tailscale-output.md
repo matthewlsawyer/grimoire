@@ -1,4 +1,4 @@
-# Example scry run: projects/tailscale
+# Example scry run: `tailscale`
 
 | Field | Value |
 | --- | --- |

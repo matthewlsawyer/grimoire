@@ -15,12 +15,16 @@ A spellbook of small, composable agent skills.
 
 +===+===+===+===+===+===+===+===+===+===+===+===+
 
-/grim-scry  ~≃> Distill a repository into a canonical model
+/grim-scry   ~≃> Distill a repository into an at-a-glance lense
 /grim-repo   ~≃> Discover repos and summarize Git state across a workspace
 /grim-weave  ~≃> Reveal relationships between repositories and systems
 /grim-trace  ~≃> Trace a symbol, concept, or service through its relationships
 /grim-adr    ~≃> Capture durable architectural decision records
 ```
+
+| Skill | Examples |
+| --- | --- |
+| [grim-scry](grim-scry/README.md) | Project at-a-glance understanding |
 
 ## Axioms
 
@@ -29,7 +33,7 @@ A spellbook of small, composable agent skills.
 - Opinionated defaults
 - Small, single-responsibility skills
 - Knowledge first -> viewport second
-- Agentic workflows -> think unix `grim-scry && grim-adr`
+- Agentic workflows -> skills work together
 - Shared artifacts live in `<agent-workspace>/.grimoire/`
 
 ## Examples
