@@ -40,7 +40,7 @@ One directory per spell: `examples/<spell>/`. One file per run.
 
 | Run | Ran with |
 | --- | --- |
-| [omarchy](examples/grim-scry/omarchy.md) | Composer 2.5, Cursor |
+| [omarchy](examples/grim-scry/omarchy.md) | Composer 2.5 |
 
 ## Roadmap
 
