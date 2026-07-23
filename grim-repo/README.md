@@ -8,7 +8,7 @@ Hunt nested git repositories, lock in which to track, then run the ledger script
 
 1. Resolve target: agent workspace root or a path the user named.
 2. Lock-in gate:
-   - Missing / empty `ledger.txt`, or asked to regenerate: run `scripts/hunt_repos.py` with an absolute `--target` (default depth `N = 4`, budget `R = 10`), then prompt (`all` / indices / `abort`). Write `ledger.txt` only after lock-in.
+   - Missing / empty `ledger.txt`, or asked to regenerate: run `scripts/hunt_repos.py` with an absolute `--target` (default depth `N = 4`, budget `R = 10`). Auto-lock when exactly one candidate; otherwise prompt (`all` / indices / `abort`). Write `ledger.txt` only after lock-in.
    - Else reuse `ledger.txt`; skip hunt and questions.
 3. Run `scripts/ascii_ledger.py` (tree / branch / sync / diff + stale). Emit stdout in chat.
 4. Return a link to `ledger.txt`. If any path was stale, ask whether to regenerate.

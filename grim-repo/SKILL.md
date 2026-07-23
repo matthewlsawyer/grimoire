@@ -19,7 +19,7 @@ Default repo budget `R = 10`.
    - Else: a path the user named.
 2. Resolve Artifact path for this target (see Artifact path).
 3. Lock-in gate:
-   - If asked to **regenerate**, or `ledger.txt` is missing / empty / unreadable: run hunt script (see Scripts), then **stop and prompt** (see Lock-in). Do not write until the user answers. After lock-in, write `ledger.txt`, then continue.
+   - If asked to **regenerate**, or `ledger.txt` is missing / empty / unreadable: run hunt script (see Scripts). If exactly one candidate, auto-lock it (no prompt). Otherwise **stop and prompt** (see Lock-in). Do not write until the user answers (unless auto-lock). After lock-in, write `ledger.txt`, then continue.
    - Else: skip hunt and questions; reuse `ledger.txt`.
 4. Run the ledger script (see Scripts). Emit its stdout in a `text` fence.
 5. Return a link to `ledger.txt`.
@@ -88,12 +88,13 @@ projects/grimoire/
 
 ### Lock-in
 
-After hunt script output, prompt before writing:
+After hunt script output:
 
-1. Emit a numbered candidate list from hunt stdout (relative paths).
-2. Closed choices: `all`, indices (e.g. `1 3 4`), or `abort`.
-3. On `abort`: stop; write nothing.
-4. On lock-in: write `ledger.txt` with the selected paths only, then run the ledger script.
+1. If hunt returned exactly one candidate: auto-lock it - write `ledger.txt` with that path, then run the ledger script. Do not prompt.
+2. Otherwise emit a numbered candidate list (relative paths).
+3. Closed choices: `all`, indices (e.g. `1 3 4`), or `abort`.
+4. On `abort`: stop; write nothing.
+5. On lock-in: write `ledger.txt` with the selected paths only, then run the ledger script.
 
 ## Output
 
