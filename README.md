@@ -20,7 +20,7 @@ A spellbook of small, composable agent skills.
 +===+===+===+===+===+===+===+===+===+===+===+===+
 
 /grim-scry   ~≃> Reveal the shape of a project
-/grim-repo   ~≃> Manage repos across workspace
+/grim-repo   ~≃> Reveal nested repos across a workspace
 /grim-weave  ~≃> Reveal relationships between systems
 /grim-trace  ~≃> Trace a symbol or concept through workspace
 /grim-adr    ~≃> Capture durable architectural decision records
@@ -31,22 +31,24 @@ A spellbook of small, composable agent skills.
 | Spell | Purpose |
 | --- | --- |
 | [grim-scry](grim-scry/README.md) | Project at-a-glance understanding |
+| [grim-repo](grim-repo/README.md) | Nested git repo ledger |
 
 ## Examples
 
 One directory per spell: `examples/<spell>/`. One file per run.
 
-```text
-examples/
-└─ grim-scry/
-   ├─ [tailscale](examples/grim-scry/tailscale-output.md) ◀─ Composer 2.5, Cursor
-   └─ [kubernetes](examples/grim-scry/kubernetes-output.md) ◀─ Composer 2.5, Cursor
-```
+### [grim-scry](grim-scry/README.md)
+
+| Run | Ran with |
+| --- | --- |
+| [tailscale](examples/grim-scry/tailscale-output.md) | Composer 2.5, Cursor |
+| [kubernetes](examples/grim-scry/kubernetes-output.md) | Composer 2.5, Cursor |
 
 ## Roadmap
 
 - [x] grim-scry (chat-only ASCII lenses)
-- [ ] grim-repo, grim-weave, grim-trace, grim-adr
+- [x] grim-repo (ASCII ledger + user lock-in `ledger.txt`)
+- [ ] grim-weave, grim-trace, grim-adr
 
 ## Install
 
