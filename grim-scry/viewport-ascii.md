@@ -164,7 +164,7 @@ next.js
 │  └─▶ pnpm types
 ├─ PR triage
 │  └─▶ node scripts/pr-status.js
-│     └─▶ .agents/skills/pr-status-triage/SKILL.md ◀─ CI failure workflow
+│      └─▶ .agents/skills/pr-status-triage/SKILL.md ◀─ CI failure workflow
 └─ Specialized instructions
    └─▶ AGENTS.md ◀─ primary instruction
 ```
