@@ -11,38 +11,60 @@ _Reveal the shape of a system._
 ## Workflow
 
 Default depth `N = 3`.
-Default seed read budget `K = 12`.
+Default seed read budget `K = 20`.
+Default dir width `W = 25`.
 
 1. Resolve target (cwd / named repo; ask if unclear)
-2. Dir reveal (structure) - first pass:
-   - Run a directory listing rooted at the target `find -P . -mindepth 1 -maxdepth "$N"` with default or given `N`.
-   - Honor `.gitignore`; skip `.git`, plumbing, vendor, and generated paths.
-   - Avoid symlinks (could cause looping).
-   - This pass feeds the Directory lens; mute folders may still appear.
-3. Seed hunt (meaning) - second pass; list cheap, read capped:
-   - Under the target (not limited to depth `N`), find seed files: README, `AGENTS.md` / `CLAUDE.md` / other agent files as AGENTS, SKILLS, RULES (e.g. `rule-name.mdc`), and index files (`index.md`, `index.yaml`, or similar).
-   - Honor `.gitignore`; skip `.git`, plumbing, vendor, and generated paths. Avoid symlinks.
-   - Rank shallow-first (fewer path segments wins). Prefer root + each top-level child seed when present, then fill remaining budget by depth.
-   - Read budget default or given `K` seeds. Read in rank order until budget filled; leave the rest unread.
+2. Run discovery script (see Scripts) with absolute `--target`, `--depth N`, `--budget K`, `--dir-width W`. Use stdout as the inventory snapshot. Do not write inventory to disk.
+3. From discover stdout:
+   - Use `## dirs` for Directory lens structure (mute folders may still appear). Group by parent; preserve script sibling order (do not reorder for salience).
+   - Read **only** the paths under `## seeds` (already ranked and capped). Leave any other seeds unread.
+   - Skip unreadable seed paths; omit rather than invent. Optional short Observation if several miss.
    - Extract meaning from what was read. Annotate directory purpose only when docs named it - do not invent purposes.
    - Concepts / scripts / instructions / configs: if a candidate cannot be named from this crawl, omit it.
-   - No follow-up discovery after the ranked read set.
+   - No follow-up discovery after the script. Do not re-`find` in-session.
 4. Distill -> small salient set only (cap what you keep, not shell commands):
    - Fast: prefer fewer nodes, short purposes/notes; omit rather than verify.
    - Directory tree may be fuller than concepts/workflows; emit at-a-glance depth.
-5. Emit per Output below. Hold shape in-session only - do not write a model file to disk.
+   - Prefer unlabeled nodes. Annotate only when the label alone would mislead. Per-lens budgets: see Lenses.
+   - Always distill in-session from the inventory snapshot. Do not write distilled lenses to disk.
+5. Emit per Output below.
+
+## Scripts
+
+```text
+scripts/discover.py
+```
+
+```bash
+python3 scripts/discover.py --target <spell-target-abs> --depth 3 --budget 20 --dir-width 25
+```
+
+- Always pass an absolute `--target` (the resolved spell target). Never use `--target .` when invoking from the skill directory - `.` means the skill package, not the workspace.
+- Stdout sections (closed set): `## dirs` then `## seeds`. Dirs keep trailing `/`; seeds are files.
+- Pipeline: list paths once -> split. Dirs: depth `N` + fan-out `W`. Seeds: basename filter -> rank -> budget `K` (not depth-truncated).
+- Git target: `git ls-files --cached --others --exclude-standard` (ignore free). No-git: plain `os.walk` (no deny list; prune `.git` basename; skip symlinks).
+- Script lists only. Agent reads seed file contents; script does not distill or write inventory to disk.
 
 ## Output
 
-1. Emit the three lenses (see Lenses) as ASCII trees (see ASCII).
-2. Surface a short Summary and Observations.
+1. Emit the three lenses (see Lenses) as ASCII trees (see ASCII), with distillation.
+  - `# Lense` (e.g. "Directory hierarchy").
+  - Distillation - Short description/distillation from this section.
+  - Text fenced ASCII tree.
+2. Divider `---`
+3. Surface a short Summary and Observations.
+  - `# Summary` followed by `[summary]`
+  - "Observations:" followed by list `- [observation]`
 
 ## Constraints
 
-- Two discovery steps only: dir reveal to `maxdepth N`, then seed list + ranked read. No deep code intelligence.
-- Seed *listing* may span the whole target; seed *reads* are ranked shallow-first and capped by budget `K`. Cap reads, not find.
-- Seeds only - no follow-up discovery after the ranked read set.
-- Ignore plumbing, boilerplate, generated, and vendor paths.
+- Discovery is script-owned (`scripts/discover.py`) every run. No inventory cache. No in-session `find`. No deep code intelligence.
+- Seed *listing* may span the whole target (not depth-capped); seed *reads* are the ranked `## seeds` list capped by budget `K`. Cap reads and dir emit (`N`, `W`), not seed hunt.
+- Seeds only - no follow-up discovery after the script.
+- Git: honor ignore via `ls-files --exclude-standard`. Always prune `.git` by basename. Avoids symlinks.
+- Absolute `--target` required when invoking from the skill directory.
+- Do not write inventory, distilled lenses, or a model file to disk.
 - Do not invent directory purposes for reveal-only dirs.
 - Observations are short bullets, not a second essay.
 - README files are not instruction, they are evidence-only.
@@ -57,15 +79,21 @@ Three named views. Agent chooses tree shape; lens intent is the constraint.
 
 ### Directory hierarchy
 
-Filesystem structure. Purpose annotations only when documentation earned them.
+Filesystem structure. Group `## dirs` by parent; preserve discovery sibling order. Annotate purpose only when docs named it - do not invent.
+
+Prefer legibility over density; annotate important directories.
 
 ### Conceptual hierarchy
 
 Ideas first. Implementers and containers hung underneath concepts.
 
+Prefer legibility over density; annotate roots / forks / non-obvious mappings.
+
 ### Workflow hierarchy
 
-Named flows. Commands and entrypoints grouped by purpose; invocation direction with `▶`.
+Named flows. Commands and entrypoints grouped by purpose.
+
+Prefer legibility over density; annotate commands, complexity / non-obvious purpose.
 
 ---
 
@@ -83,13 +111,13 @@ Rules:
 
 - Emit each lens in a `text` fence.
 - Prefer vertical, at-a-glance trees over dense graphs.
-- Labels are short; optional annotations use `◀─ <terse note>`.
+- Labels are short; optional annotations use `◀─ <terse note>` (≤ ~8 words). Prefer omit.
 - In annotations, use `─▶` for infix direction (`a ─▶ b`).
 - Indent each level; continue ancestors with `│` (three-column gutters).
 - `├─` for a non-final sibling; `└─` for the final sibling.
 - If a cycle appears, break it for rendering; do not loop forever.
 - If a node has multiple parents, choose one primary parent for the tree.
-- Treat below examples as north stars, not rigid templates.
+- Treat below examples as north stars, not rigid templates. North stars may be denser than the annotation budget - follow the budget on emit.
 
 ### Directory hierarchy - north star
 
