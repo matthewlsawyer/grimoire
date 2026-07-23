@@ -20,7 +20,7 @@ A spellbook of small, composable agent skills.
 +===+===+===+===+===+===+===+===+===+===+===+===+
 
 /grim-scry   ~≃▶ Shape of a system
-/grim-repo   ~≃▶ Manage repos
+/grim-repo   ~≃▶ Nested repos
 /grim-weave  ~≃▶ Relationships between systems
 /grim-trace  ~≃▶ Trace a symbol
 /grim-adr    ~≃▶ Capture durable records
@@ -31,6 +31,7 @@ A spellbook of small, composable agent skills.
 | Spell | Purpose |
 | --- | --- |
 | [grim-scry](grim-scry/README.md) | Project at-a-glance understanding |
+| [grim-repo](grim-repo/README.md) | Nested git repo ledger |
 
 ## Examples
 
@@ -45,7 +46,8 @@ One directory per spell: `examples/<spell>/`. One file per run.
 ## Roadmap
 
 - [x] grim-scry
-- [ ] grim-repo, grim-weave, grim-trace, grim-adr
+- [x] grim-repo
+- [ ] grim-weave, grim-trace, grim-adr
 
 ## Install
 
