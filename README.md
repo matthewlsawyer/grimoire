@@ -36,12 +36,12 @@ A spellbook of small, composable agent skills.
 
 One directory per spell: `examples/<spell>/`. One file per run.
 
-```text
-examples/
-└─ grim-scry/
-   ├─ [tailscale](examples/grim-scry/tailscale-output.md) ◀─ Composer 2.5, Cursor
-   └─ [kubernetes](examples/grim-scry/kubernetes-output.md) ◀─ Composer 2.5, Cursor
-```
+### [grim-scry](grim-scry/README.md)
+
+| Run | Ran with |
+| --- | --- |
+| [tailscale](examples/grim-scry/tailscale-output.md) | Composer 2.5, Cursor |
+| [kubernetes](examples/grim-scry/kubernetes-output.md) | Composer 2.5, Cursor |
 
 ## Roadmap
 
