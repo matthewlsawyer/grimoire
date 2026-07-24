@@ -2,50 +2,51 @@
 
 ```text
 ╭───────────────╮
-│  ◈ grimoire   ║
-│  ══✧═════✧══  ║
+│  ◆ grimoire   ║
+│  ══+═════+══  ║
 │               ║
-|  / ~≃▶ cast   ║
+|  / ◇─▶ cast   ║
 │               ║
 │  ────┬┼┬────  ║
-│     ✧ ◈ ✧     ║
+│     + ◆ +     ║
 ╰≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡╝
 
-A spellbook of small, composable agent skills.
-
-+===+===+===+===+===+===+===+===+===+===+===+===+
-
-> *At-a-glance* is a feature
-
-+===+===+===+===+===+===+===+===+===+===+===+===+
-
-/grim-scry   ~≃▶ Shape of a system
-/grim-repo   ~≃▶ Manage repos
-/grim-weave  ~≃▶ Relationships between systems
-/grim-trace  ~≃▶ Trace a symbol
-/grim-adr    ~≃▶ Capture durable records
+A spellbook of at-a-glance agent skills.
 ```
 
 ## Skills
 
 | Spell | Purpose |
 | --- | --- |
-| [grim-scry](grim-scry/README.md) | Project at-a-glance understanding |
+| [grim-scry](grim-scry/README.md) | Reveal project meaning |
+| [grim-repo](grim-repo/README.md) | Nested git repo ledger |
+
+## Glyph Dictionary
+
+| Glyph | Role |
+| --- | --- |
+| `│` `├` `└` `─` | hierarchy (structure) |
+| `╞` `═` | divider |
+| `ⓘ` | annotation |
+| `▶` | execution |
+| `▲` | status / delta / metric |
+| `●` | state / snapshot |
+| `◆` | terminator |
 
 ## Examples
 
 One directory per spell: `examples/<spell>/`. One file per run.
 
-### [grim-scry](grim-scry/README.md)
-
-| Run | Ran with |
-| --- | --- |
-| [omarchy](examples/grim-scry/omarchy.md) | Composer 2.5 |
+| Run | Date | Ran with |
+| --- | --- | --- |
+| [grim-scry/omarchy](examples/grim-scry/omarchy.md) | 2026-07-24 | Composer 2.5 |
+| [grim-repo/throneroom](examples/grim-repo/throneroom.md) | 2026-07-24 | Composer 2.5 |
 
 ## Roadmap
 
 - [x] grim-scry
-- [ ] grim-repo, grim-weave, grim-trace, grim-adr
+- [x] grim-repo
+- [ ] grim-weave, grim-trace, grim-adr
 
 ## Install
 

@@ -1,19 +1,20 @@
-| Field | Value |
-| --- | --- |
-| Target | [omarchy](https://github.com/basecamp/omarchy) |
-| Model | Composer 2.5 |
-| Ran with | Cursor |
-| Runtime | 12s |
-| Date | 2026-07-24 |
 
-# Scry Lantern
+| Field    | Value                                          |
+| -------- | ---------------------------------------------- |
+| Target   | [omarchy](https://github.com/basecamp/omarchy) |
+| Model    | Composer 2.5                                   |
+| Ran with | Cursor                                         |
+| Runtime  | 12s                                            |
+| Date     | 2026-07-24                                     |
+
+# Grim Scry: Omarchy
 
 Opinionated Arch-based desktop distro: Hyprland compositor, one Quickshell `omarchy-shell`, and an `omarchy-*` CLI over install/config/themes and pluginized UI.
 
 ```text
 Omarchy
 ├─ⓘ Beautiful, modern & opinionated Linux (DHH); omarchy.org; MIT
-╞══════════════════◈
+╞══════════════════◆
 ├─ Product surface
 │  ├─ default/omarchy-skill/SKILL.md
 │  │  └─ⓘ End-user ~/.config customization; not source dev
@@ -57,7 +58,7 @@ Omarchy
 
 # Summary
 
-[Omarchy](https://github.com/basecamp/omarchy) is Basecamp’s opinionated Linux desktop stack: Arch underneath, Hyprland for the compositor, and a single **Quickshell** process (`shell/`) that hosts the bar, menus, overlays, panels, and headless services as **manifest-driven plugins**. User-facing behavior is exposed through the **`omarchy` router** and many `omarchy-*` helpers (themes, refresh, capture, packages, setup, updates); shipped defaults live under `config/` and `themes/`, with install/finalization leaves under `install/` and per-user migrations under `migrations/`. **`AGENTS.md`** is the repo’s engineering contract (bash style, command metadata, tests, visual verification, shell IPC). The bundled **`default/omarchy-skill`** targets **installed-system customization** in `~/.config/`, not hacking `/usr/share/omarchy/`.
+[Omarchy](https://github.com/basecamp/omarchy) is Basecamp’s opinionated Linux desktop stack: Arch underneath, Hyprland for the compositor, and a single **Quickshell** process (`shell/`) that hosts the bar, menus, overlays, panels, and headless services as **manifest-driven plugins**. User-facing behavior is exposed through the `omarchy` **router** and many `omarchy-`* helpers (themes, refresh, capture, packages, setup, updates); shipped defaults live under `config/` and `themes/`, with install/finalization leaves under `install/` and per-user migrations under `migrations/`. `AGENTS.md` is the repo’s engineering contract (bash style, command metadata, tests, visual verification, shell IPC). The bundled `default/omarchy-skill` targets **installed-system customization** in `~/.config/`, not hacking `/usr/share/omarchy/`.
 
 **Observations:**
 

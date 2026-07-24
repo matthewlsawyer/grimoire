@@ -6,7 +6,7 @@ description: >-
 
 _Reveal the shape of a system._
 
-# Scry Workflow
+# Grim Scry Workflow
 
 1. Resolve target (cwd / named repo; ask if unclear).
 2. Run Script; stdout lines are the seed paths (closed set).
@@ -35,13 +35,13 @@ python3 scripts/discover.py --target <spell-target-abs> --budget 20
 North star: at-a-glance. Every section stays tight and high-level.
 
 1. Emit one Scry Lantern:
-  - `# Scry Lantern` outside the fence
+  - `# Grim Scry: <project>` outside the fence
   - One-line distillation outside the fence
   - `text` fence: tree only
 2. `# Summary` - one short paragraph; high-level shape only
 3. `Observations:` - ≤3 `-` bullets; high-signal only
 
-# Scry Lantern
+### Scry Lantern
 
 Ideas first. Implementers hung underneath concepts. Hang named commands under their concept (`▶`). Annotate with `ⓘ` only when seeds named purpose - do not invent.
 
@@ -53,18 +53,16 @@ Style:
 - Hierarchy branch glyphs: `│`, `├─`, `└─`.
 - Annotation glyphs: `├─ⓘ`, `└─ⓘ`, `─ⓘ`.
 - Command glyphs: `├─▶`, `└─▶`, `─▶`.
-- Divider glyph: `╞══════════════════◈`
+- Divider glyph: `╞══════════════════◆`
 - Indent each level; continue ancestors with `│`.
 - `├─` / `├─ⓘ` / `├─▶` non-final sibling; `└─` / `└─ⓘ` / `└─▶` final sibling.
 
-## Guide
-
-Rules and Style above are authoritative. Below is guide only; do not match content or breadth.
+Rules above are authoritative; below is drawing guide only.
 
 ```text
 API
 ├─ⓘ Go todo api surface
-╞══════════════════◈
+╞══════════════════◆
 ├─ Runtime
 │  ├─ⓘ Runtime descriptions
 │  ├─ server/
