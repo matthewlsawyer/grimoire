@@ -5,7 +5,7 @@
 │  ◈ grimoire   ║
 │  ══✧═════✧══  ║
 │               ║
-|  / ~≃> cast   ║
+|  / ~≃▶ cast   ║
 │               ║
 │  ────┬┼┬────  ║
 │     ✧ ◈ ✧     ║
@@ -19,11 +19,11 @@ A spellbook of small, composable agent skills.
 
 +===+===+===+===+===+===+===+===+===+===+===+===+
 
-/grim-scry   ~≃> Reveal the shape of a project
-/grim-repo   ~≃> Manage repos across workspace
-/grim-weave  ~≃> Reveal relationships between systems
-/grim-trace  ~≃> Trace a symbol or concept through workspace
-/grim-adr    ~≃> Capture durable architectural decision records
+/grim-scry   ~≃▶ Shape of a system
+/grim-repo   ~≃▶ Manage repos
+/grim-weave  ~≃▶ Relationships between systems
+/grim-trace  ~≃▶ Trace a symbol
+/grim-adr    ~≃▶ Capture durable records
 ```
 
 ## Skills
@@ -36,16 +36,15 @@ A spellbook of small, composable agent skills.
 
 One directory per spell: `examples/<spell>/`. One file per run.
 
-```text
-examples/
-└─ grim-scry/
-   ├─ [tailscale](examples/grim-scry/tailscale-output.md) ◀─ Composer 2.5, Cursor
-   └─ [kubernetes](examples/grim-scry/kubernetes-output.md) ◀─ Composer 2.5, Cursor
-```
+### [grim-scry](grim-scry/README.md)
+
+| Run | Ran with |
+| --- | --- |
+| [omarchy](examples/grim-scry/omarchy.md) | Composer 2.5, Cursor |
 
 ## Roadmap
 
-- [x] grim-scry (chat-only ASCII lenses)
+- [x] grim-scry
 - [ ] grim-repo, grim-weave, grim-trace, grim-adr
 
 ## Install
