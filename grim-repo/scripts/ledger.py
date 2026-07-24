@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 """
-Read-only helper for `/grim-repo`: recompute ASCII ledger blocks from ledger.txt.
+Read-only helper for `/grim-repo`: recompute ledger from ledger.txt.
 
 - Reads `.grimoire/grim-repo/<slug>/ledger.txt` (locked-in paths only)
 - Validates which paths are still git roots under the spell target
-- Runs git status probes and prints the ledger in the skill format
-  (tree / branch / sync / diff + stale)
+- Owns Unicode ledger format (diff / branch + stale)
+- Glyphs: `▲` status (diff metric), `●` state (branch)
 - Does not hunt, lock in, write, or prune the ledger
+- Agent fences stdout only - do not redraw
 """
 
 from __future__ import annotations
@@ -22,10 +23,7 @@ from typing import List, Tuple
 @dataclass(frozen=True)
 class RepoBlock:
     repo_display: str
-    repo_leaf: str
-    tree_token: str
     branch_token: str
-    sync_token: str
     diff_token: str
 
 
@@ -60,21 +58,12 @@ def slug_for_target(target_rel: str, workspace: str) -> str:
     return rel.strip("/").replace("/", "-")
 
 
-def resolve_repo(rel: str, target_root: str) -> Tuple[str, str, str]:
-    """Return (absolute_path, display_path, leaf_name) for a ledger entry."""
+def resolve_repo(rel: str, target_root: str) -> Tuple[str, str]:
+    """Return (absolute_path, display_path) for a ledger entry."""
     if rel == "./":
-        leaf = os.path.basename(target_root.rstrip("/"))
-        return target_root, "./", leaf
+        return target_root, "./"
     display = rel.rstrip("/") + "/"
-    leaf = os.path.basename(rel.rstrip("/"))
-    return os.path.join(target_root, rel), display, leaf
-
-
-def token_tree(repo_path: str) -> str:
-    code, porcelain = run(["git", "status", "--porcelain=v1"], cwd=repo_path)
-    if code != 0:
-        raise RuntimeError(f"git status failed in {repo_path}")
-    return "dirty" if porcelain else "clean"
+    return os.path.join(target_root, rel), display
 
 
 def token_branch(repo_path: str) -> str:
@@ -90,32 +79,6 @@ def token_branch(repo_path: str) -> str:
     if code != 0 or not branch:
         raise RuntimeError(f"git branch --show-current failed in {repo_path}")
     return branch
-
-
-def token_sync(repo_path: str) -> str:
-    code, remotes = run(["git", "remote"], cwd=repo_path)
-    if code != 0:
-        raise RuntimeError(f"git remote failed in {repo_path}")
-    if not remotes:
-        return "no-remote"
-
-    up_code, _ = run(["git", "rev-parse", "--abbrev-ref", "@{upstream}"], cwd=repo_path)
-    if up_code != 0:
-        return "no-up"
-
-    # @{upstream}...HEAD => left=behind, right=ahead
-    count_code, counts = run(
-        ["git", "rev-list", "--left-right", "--count", "@{upstream}...HEAD"],
-        cwd=repo_path,
-    )
-    if count_code != 0 or not counts:
-        raise RuntimeError(f"git rev-list failed in {repo_path}")
-
-    parts = counts.split()
-    if len(parts) != 2:
-        raise RuntimeError(f"unexpected rev-list output in {repo_path}: {counts!r}")
-    behind, ahead = parts
-    return f"↑{ahead} ↓{behind}"
 
 
 def _sum_numstat(text: str) -> Tuple[int, int]:
@@ -172,20 +135,27 @@ def token_diff(repo_path: str) -> str:
     return f"+{added} -{deleted}"
 
 
-def render_block(block: RepoBlock) -> str:
-    return "\n".join(
-        [
-            f"{block.repo_display} ◀─ {block.repo_leaf}",
-            f"├─▶ {block.tree_token}",
-            f"├─▶ {block.branch_token}",
-            f"├─▶ {block.sync_token}",
-            f"└─▶ {block.diff_token}",
-        ]
-    )
+def render_ledger(target_leaf: str, blocks: List[RepoBlock]) -> str:
+    """Forest under target leaf: divider, then path-only repos; children ▲ status then ● state."""
+    lines: List[str] = [
+        f"{target_leaf}/",
+        "╞══════════════════◆",
+    ]
+    n = len(blocks)
+    for i, block in enumerate(blocks):
+        last = i == n - 1
+        branch = "└─" if last else "├─"
+        gutter = "   " if last else "│  "
+        lines.append(f"{branch} {block.repo_display}")
+        lines.append(f"{gutter}├─▲ {block.diff_token}")
+        lines.append(f"{gutter}└─● {block.branch_token}")
+        if not last:
+            lines.append("│")
+    return "\n".join(lines)
 
 
 def main() -> int:
-    ap = argparse.ArgumentParser(description="Recompute grim-repo ASCII ledger from ledger.txt")
+    ap = argparse.ArgumentParser(description="Recompute grim-repo ledger from ledger.txt")
     ap.add_argument(
         "--workspace",
         default=".",
@@ -237,7 +207,7 @@ def main() -> int:
     errors: List[str] = []
 
     for rel in rel_paths:
-        repo_path, repo_display, repo_leaf = resolve_repo(rel, target_root)
+        repo_path, repo_display = resolve_repo(rel, target_root)
         if not is_git_root(repo_path):
             stale.append(rel)
             continue
@@ -245,10 +215,7 @@ def main() -> int:
             blocks.append(
                 RepoBlock(
                     repo_display=repo_display,
-                    repo_leaf=repo_leaf,
-                    tree_token=token_tree(repo_path),
                     branch_token=token_branch(repo_path),
-                    sync_token=token_sync(repo_path),
                     diff_token=token_diff(repo_path),
                 )
             )
@@ -256,12 +223,13 @@ def main() -> int:
             errors.append(str(e))
 
     if blocks:
-        print("\n\n".join(render_block(b) for b in blocks))
+        target_leaf = os.path.basename(target_root.rstrip("/"))
+        print(render_ledger(target_leaf, blocks))
 
     if stale:
         if blocks:
             print()
-        print("\nStale paths (not git roots anymore):")
+        print("Stale paths (not git roots anymore):")
         for s in stale:
             print(f"- {s}")
 
