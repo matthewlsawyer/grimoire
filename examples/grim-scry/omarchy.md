@@ -7,7 +7,6 @@
 | Runtime  | 12s                                            |
 | Date     | 2026-07-24                                     |
 
-
 # Grim Scry: Omarchy
 
 Opinionated Arch-based desktop distro: Hyprland compositor, one Quickshell `omarchy-shell`, and an `omarchy-*` CLI over install/config/themes and pluginized UI.
@@ -57,8 +56,6 @@ Omarchy
    └─▶ omarchy update
 ```
 
-
-
 # Summary
 
 [Omarchy](https://github.com/basecamp/omarchy) is Basecamp’s opinionated Linux desktop stack: Arch underneath, Hyprland for the compositor, and a single **Quickshell** process (`shell/`) that hosts the bar, menus, overlays, panels, and headless services as **manifest-driven plugins**. User-facing behavior is exposed through the `omarchy` **router** and many `omarchy-`* helpers (themes, refresh, capture, packages, setup, updates); shipped defaults live under `config/` and `themes/`, with install/finalization leaves under `install/` and per-user migrations under `migrations/`. `AGENTS.md` is the repo’s engineering contract (bash style, command metadata, tests, visual verification, shell IPC). The bundled `default/omarchy-skill` targets **installed-system customization** in `~/.config/`, not hacking `/usr/share/omarchy/`.
@@ -68,4 +65,3 @@ Omarchy
 - The shell is deliberately **one process**: panels and menus are **summoned via IPC** (`bin/omarchy-shell` → `shell` target) instead of spawning extra Quickshell instances.
 - **Customization splits cleanly**: end users edit `~/.config/` and `shell.json`; first-party QML under `shell/plugins/` is cloned to `~/.config/omarchy/plugins/` when users need forks.
 - **Third-party shell plugins** are git checkouts with interactive `omarchy plugin` flows; they run **unsandboxed** inside `omarchy-shell`, so the installer emphasizes review before enable.
-

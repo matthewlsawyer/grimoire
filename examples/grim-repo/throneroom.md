@@ -3,9 +3,8 @@
 | Target | [throneroom](https://github.com/matthewlsawyer/throneroom) |
 | Model | Composer 2.5 |
 | Ran with | Cursor |
-| Runtime | 3s (subsequent run after lock-in) |
+| Runtime | 2s (w/ ledger) |
 | Date | 2026-07-24 |
-
 
 # Grim Repo: Throneroom
 

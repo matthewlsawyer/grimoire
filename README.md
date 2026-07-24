@@ -18,7 +18,7 @@ A spellbook of at-a-glance agent skills.
 
 | Spell | Purpose |
 | --- | --- |
-| [grim-scry](grim-scry/README.md) | Reveal at-a-glance understanding |
+| [grim-scry](grim-scry/README.md) | Reveal project meaning |
 | [grim-repo](grim-repo/README.md) | Nested git repo ledger |
 
 ## Glyph Dictionary
