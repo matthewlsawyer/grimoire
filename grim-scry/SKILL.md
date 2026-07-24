@@ -38,9 +38,8 @@ North star: at-a-glance. Every section stays tight and high-level.
   - `# Scry Lantern` outside the fence
   - One-line distillation outside the fence
   - `text` fence: tree only
-2. Divider `---`
-3. `# Summary` - one short paragraph; high-level shape only
-4. `Observations:` - ≤3 `-` bullets; high-signal only
+2. `# Summary` - one short paragraph; high-level shape only
+3. `Observations:` - ≤3 `-` bullets; high-signal only
 
 # Scry Lantern
 
@@ -58,9 +57,9 @@ Style:
 - Indent each level; continue ancestors with `│`.
 - `├─` / `├─ⓘ` / `├─▶` non-final sibling; `└─` / `└─ⓘ` / `└─▶` final sibling.
 
-Specimen:
-- Guide only 
-- Rules and Style above are authoritative; do not match specimen breadth
+## Guide
+
+Rules and Style above are authoritative. Below is guide only; do not match content or breadth.
 
 ```text
 API

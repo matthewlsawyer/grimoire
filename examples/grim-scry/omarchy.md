@@ -3,6 +3,7 @@
 | Target | [omarchy](https://github.com/basecamp/omarchy) |
 | Model | Composer 2.5 |
 | Ran with | Cursor |
+| Runtime | 12s |
 | Date | 2026-07-24 |
 
 # Scry Lantern
@@ -53,8 +54,6 @@ Omarchy
    ├─▶ omarchy theme set
    └─▶ omarchy update
 ```
-
----
 
 # Summary
 
