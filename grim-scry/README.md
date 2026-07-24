@@ -2,33 +2,23 @@
 
 _Reveal the shape of a system._
 
-Given a repository or workspace, distill meaning and emit three at-a-glance ASCII lenses in chat.
+Given a repository or workspace, distill meaning and emit one at-a-glance Scry Lantern in chat.
 
 ## Shape
 
 1. Resolve the target.
-2. Run `scripts/discover.py` every time (absolute `--target`; depth `N`, seed budget `K`, dir width `W`). Use stdout as the inventory snapshot - do not write it to disk.
-3. From stdout: read only the listed seeds; distill to a small salient set. Annotate purpose only when docs named it. Always distill in chat - do not write lenses to disk.
+2. Discover a closed seed set (session-only).
+3. Read only those seeds; distill for salience. Annotate purpose only when docs named it.
 4. Emit:
-   - Directory hierarchy
-   - Conceptual hierarchy
-   - Workflow hierarchy
-   - Summary + observations
+  - Scry Lantern (one tree: concepts, paths, commands)
+  - Summary + observations
 
-Viewport is the spell. Agent chooses tree form; glyphs and lens intents constrain the render. Inventory is session-only stdout; lenses are session-only.
+Viewport is the spell. Ideas hang first; implementers and named commands hang underneath.
+
+Inventory and lantern stay session-only.
 
 ## Scripts
 
 | File | Role |
 | --- | --- |
-| [scripts/discover.py](scripts/discover.py) | Deterministic `## dirs` + `## seeds` discovery |
-
-## Lenses
-
-| Lens | Intent |
-| --- | --- |
-| Directory | Filesystem structure; purpose only when docs earned it |
-| Conceptual | Ideas first; implementers/containers under concepts |
-| Workflow | Named flows; commands/entrypoints; invocations |
-
-Keep lenses distinct. Omit rather than invent.
+| [scripts/discover.py](scripts/discover.py) | Deterministic seed listing |
