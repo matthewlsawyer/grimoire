@@ -16,21 +16,16 @@ _What lives must be named._
 
 ## Ledger
 
+From the skill root directory, run:
+
 ```bash
-python3 scripts/ledger.py --target <spell-target-abs>
+python3 <skill-root>/scripts/ledger.py --target <absolute_target_filepath>
 ```
 
-- Absolute `--target` only; never `--target .`.
+- Always pass an absolute workspace to `--target`. Never use `--target .`
 - Owns find + status draw. Fence full stdout as-is. Do not redraw.
 
 ## Output
 
 1. `# Grim Repo: <project>` outside the fence
 2. `text` fence: full ledger stdout
-3. Next steps
-
-## Scripts
-
-| File | Role |
-| --- | --- |
-| [scripts/ledger.py](scripts/ledger.py) | Find nested git roots + live status board |

@@ -3,8 +3,9 @@
 | Target | [throneroom](https://github.com/matthewlsawyer/throneroom) |
 | Model | Composer 2.5 |
 | Ran with | Cursor |
+| Prompt | `/grim-repo` |
 | Runtime | ~2s |
-| Date | 2026-07-24 |
+| Date | 2026-07-25 |
 
 # Grim Repo: Throneroom
 
@@ -12,20 +13,27 @@
 throneroom/
 ╞══════════════════◆
 ├─ ./
-│  ├─▲ +73 -5
+│  ├─▲ ↑1 ↓0
+│  ├─▲ +0 -0
 │  └─● main
 │
 ├─ projects/dotfiles/
+│  ├─▲ ↑0 ↓0
 │  ├─▲ +8 -8
 │  └─● main
 │
 ├─ projects/grimoire/
-│  ├─▲ +118 -280
-│  └─● feat/grim-repo
+│  ├─▲ ↑0 ↓0
+│  ├─▲ +71 -21
+│  └─● main
 │
-└─ projects/site/
-   ├─▲ +3 -9
+├─ projects/site/
+│  ├─▲ ↑0 ↓0
+│  ├─▲ +83 -3
+│  └─● main
+│
+└─ scratch/superfile-2026-07-23/
+   ├─▲ ↑0 ↓0
+   ├─▲ +0 -0
    └─● main
 ```
-
-Illustrative capture; live run includes every git root under the target.

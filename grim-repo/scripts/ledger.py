@@ -4,17 +4,19 @@ Read-only helper for `/grim-repo`: live nested-repo status board.
 
 - find(1) for nested `.git` roots, then branch + diff per repo
 - Unicode board format (diff / branch)
-- Glyphs: `▲` status (diff metric), `●` state (branch)
+- Glyphs: `▲` status (diff metric, ahead/behind), `●` state (branch)
 
 Example stdout::
 
     throneroom/
     ╞══════════════════◆
     ├─ ./
+    │  ├─▲ ↑0 ↓0
     │  ├─▲ +0 -0
     │  └─● main
     │
     └─ projects/site/
+    │  ├─▲ ↑1 ↓0
        ├─▲ +3 -9
        └─● main
 """
@@ -34,6 +36,7 @@ class RepoBlock:
     repo_display: str
     branch_token: str
     diff_token: str
+    sync_token: str
 
 
 def run(cmd: List[str], cwd: str) -> Tuple[int, str]:
@@ -126,6 +129,31 @@ def token_branch(repo_path: str) -> str:
     return branch
 
 
+def token_sync(repo_path: str) -> str:
+    code, remotes = run(["git", "remote"], cwd=repo_path)
+    if code != 0:
+        raise RuntimeError(f"git remote failed in {repo_path}")
+    if not remotes:
+        return "no-remote"
+
+    up_code, _ = run(["git", "rev-parse", "--abbrev-ref", "@{upstream}"], cwd=repo_path)
+    if up_code != 0:
+        return "no-up"
+
+    count_code, counts = run(
+        ["git", "rev-list", "--left-right", "--count", "@{upstream}...HEAD"],
+        cwd=repo_path,
+    )
+    if count_code != 0 or not counts:
+        raise RuntimeError(f"git rev-list failed in {repo_path}")
+
+    parts = counts.split()
+    if len(parts) != 2:
+        raise RuntimeError(f"unexpected rev-list output in {repo_path}: {counts!r}")
+    behind, ahead = parts
+    return f"↑{ahead} ↓{behind}"
+
+
 def _sum_numstat(text: str) -> Tuple[int, int]:
     added = 0
     deleted = 0
@@ -179,7 +207,7 @@ def token_diff(repo_path: str) -> str:
 
 
 def render_ledger(target_leaf: str, blocks: List[RepoBlock]) -> str:
-    """Forest under target leaf: divider, then repos with ▲ diff then ● branch."""
+    """Forest under target leaf: divider, then repos with ▲ diff, ▲ sync, ● branch."""
     lines: List[str] = [
         f"{target_leaf}/",
         "╞══════════════════◆",
@@ -190,6 +218,7 @@ def render_ledger(target_leaf: str, blocks: List[RepoBlock]) -> str:
         branch = "└─" if last else "├─"
         gutter = "   " if last else "│  "
         lines.append(f"{branch} {block.repo_display}")
+        lines.append(f"{gutter}├─▲ {block.sync_token}")
         lines.append(f"{gutter}├─▲ {block.diff_token}")
         lines.append(f"{gutter}└─● {block.branch_token}")
         if not last:
@@ -223,6 +252,7 @@ def main() -> int:
                     repo_display=repo_display,
                     branch_token=token_branch(repo_path),
                     diff_token=token_diff(repo_path),
+                    sync_token=token_sync(repo_path),
                 )
             )
         except RuntimeError as e:
