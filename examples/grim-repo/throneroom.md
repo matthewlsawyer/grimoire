@@ -3,7 +3,7 @@
 | Target | [throneroom](https://github.com/matthewlsawyer/throneroom) |
 | Model | Composer 2.5 |
 | Ran with | Cursor |
-| Runtime | 2s (w/ ledger) |
+| Runtime | ~2s |
 | Date | 2026-07-24 |
 
 # Grim Repo: Throneroom
@@ -28,8 +28,4 @@ throneroom/
    └─● main
 ```
 
-Ledger: [.grimoire/grim-repo/throneroom/ledger.txt](...).
-
-Run again for fast repository status against the ledger.
-
-Say **regenerate** to rewrite the ledger.
+Illustrative capture; live run includes every git root under the target.
