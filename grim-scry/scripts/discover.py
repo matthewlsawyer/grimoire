@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 """
-Deterministic discovery for `/grim-scry`.
+Deterministic discovery for `/grim-scry` via find(1).
 
-List-then-filter pipeline:
-  list paths -> (git ignore via ls-files, or plain walk)
-  -> basename seed filter -> rank -> budget K
-  -> flat seed paths on stdout (one per line)
+- find for seed basenames under target; does not honor gitignore
+- Prunes `.git` dirs only (speed); skips symlinks via find default
+- Basename post-filter -> shallow-first sort -> budget K
+- Flat seed paths on stdout (one per line)
 
-Does not read seed contents, distill, or write artifacts. Emits to stdout only.
+Does not read seed contents, distill, or write artifacts.
 """
 
 from __future__ import annotations
@@ -16,20 +16,6 @@ import argparse
 import os
 import subprocess
 import sys
-from typing import Iterable, List, Optional, Sequence
-
-
-def find_git_root(start: str) -> Optional[str]:
-    cur = os.path.abspath(start)
-    while True:
-        if os.path.isdir(os.path.join(cur, ".git")) or os.path.isfile(
-            os.path.join(cur, ".git")
-        ):
-            return cur
-        parent = os.path.dirname(cur)
-        if parent == cur:
-            return None
-        cur = parent
 
 
 def to_display_file(rel: str) -> str:
@@ -37,7 +23,7 @@ def to_display_file(rel: str) -> str:
     return "./" + rel if not rel.startswith("./") else rel
 
 
-def segments(rel_path: str) -> List[str]:
+def segments(rel_path: str) -> list[str]:
     p = rel_path[2:] if rel_path.startswith("./") else rel_path
     p = p.rstrip("/")
     return [s for s in p.split("/") if s]
@@ -58,107 +44,89 @@ def is_seed_file(name: str) -> bool:
     return False
 
 
-def list_files_git(target_root: str, git_root: str) -> List[str]:
-    """Tracked + untracked non-ignored files under target, as ./rel display paths."""
+def find_candidates(target_root: str) -> list[str]:
+    """Absolute paths from find(1); prune .git; match seed basenames."""
     proc = subprocess.run(
         [
-            "git",
-            "-C",
-            git_root,
-            "ls-files",
-            "-z",
-            "--cached",
-            "--others",
-            "--exclude-standard",
+            "find",
+            target_root,
+            "(",
+            "-name",
+            ".git",
+            "-type",
+            "d",
+            "-prune",
+            ")",
+            "-o",
+            "(",
+            "-type",
+            "f",
+            "(",
+            "-iname",
+            "readme",
+            "-o",
+            "-iname",
+            "readme.*",
+            "-o",
+            "-iname",
+            "agents.md",
+            "-o",
+            "-iname",
+            "agents*.md",
+            "-o",
+            "-iname",
+            "claude.md",
+            "-o",
+            "-iname",
+            "skill.md",
+            "-o",
+            "-iname",
+            "index",
+            "-o",
+            "-iname",
+            "index.md",
+            "-o",
+            "-iname",
+            "index.yaml",
+            "-o",
+            "-iname",
+            "index.yml",
+            "-o",
+            "-iname",
+            "index.json",
+            ")",
+            "-print",
+            ")",
         ],
         capture_output=True,
+        text=True,
         check=False,
     )
-    if proc.returncode != 0:
+    if proc.returncode not in (0, 1):
+        print(proc.stderr or "find failed", file=sys.stderr)
         return []
-
-    try:
-        target_from_git = os.path.relpath(target_root, git_root)
-    except ValueError:
-        return []
-    if target_from_git.startswith(".."):
-        return []
-
-    if target_from_git == ".":
-        prefix = ""
-    else:
-        prefix = target_from_git.replace(os.sep, "/") + "/"
-
-    out: List[str] = []
-    for raw in proc.stdout.split(b"\0"):
-        if not raw:
-            continue
-        try:
-            path = raw.decode("utf-8", errors="surrogateescape")
-        except Exception:
-            continue
-        path = path.replace(os.sep, "/")
-        if path == ".git" or path.startswith(".git/") or "/.git/" in path:
-            continue
-        if any(seg == ".git" for seg in path.split("/")):
-            continue
-        if prefix and not path.startswith(prefix):
-            continue
-        local = path[len(prefix) :] if prefix else path
-        if not local or local.endswith("/"):
-            continue
-        out.append(to_display_file(local))
-    return out
+    return [ln.strip() for ln in proc.stdout.splitlines() if ln.strip()]
 
 
-def list_files_walk(target_root: str) -> List[str]:
-    """All files under target via os.walk. No deny list; prune .git basename; skip symlinks."""
-    out: List[str] = []
-    for dirpath, dirnames, filenames in os.walk(target_root, followlinks=False):
-        keep: List[str] = []
-        for name in dirnames:
-            if name == ".git":
-                continue
-            child = os.path.join(dirpath, name)
-            if os.path.islink(child):
-                continue
-            keep.append(name)
-        dirnames[:] = keep
-
-        for name in filenames:
-            child = os.path.join(dirpath, name)
-            if os.path.islink(child):
-                continue
-            rel = os.path.relpath(child, target_root).replace(os.sep, "/")
-            out.append(to_display_file(rel))
-    return out
-
-
-def list_files(target_root: str) -> List[str]:
-    git_root = find_git_root(target_root)
-    if git_root is not None:
-        return list_files_git(target_root, git_root)
-    return list_files_walk(target_root)
-
-
-def collect_seeds(files: Iterable[str]) -> List[str]:
-    seeds: List[str] = []
-    for f in files:
-        name = segments(f)[-1] if segments(f) else ""
-        if name and is_seed_file(name):
-            seeds.append(f)
-    return sorted(set(seeds), key=lambda p: (len(segments(p)), p))
-
-
-def rank_seeds(candidates: Sequence[str], budget: int) -> List[str]:
+def discover(target_root: str, budget: int) -> list[str]:
     if budget < 1:
         return []
-    return sorted(candidates, key=lambda p: (len(segments(p)), p))[:budget]
 
+    found: list[str] = []
+    seen: set[str] = set()
+    for abs_path in find_candidates(target_root):
+        name = os.path.basename(abs_path)
+        if not is_seed_file(name):
+            continue
+        key = os.path.realpath(abs_path)
+        if key in seen:
+            continue
+        seen.add(key)
+        rel = os.path.relpath(abs_path, target_root)
+        found.append(to_display_file(rel))
 
-def discover(target_root: str, budget: int) -> List[str]:
-    files = list_files(target_root)
-    return rank_seeds(collect_seeds(files), budget=budget)
+    found.sort(key=lambda p: (len(segments(p)), p))
+    return found[:budget]
 
 
 def main() -> int:
@@ -173,8 +141,8 @@ def main() -> int:
     ap.add_argument(
         "--budget",
         type=int,
-        default=20,
-        help="Max ranked seed paths to emit (default 20).",
+        default=25,
+        help="Max ranked seed paths to emit (default 25).",
     )
     args = ap.parse_args()
 
@@ -187,8 +155,7 @@ def main() -> int:
         print(f"target not found: {target_root}", file=sys.stderr)
         return 2
 
-    seeds = discover(target_root, budget=args.budget)
-    for p in seeds:
+    for p in discover(target_root, budget=args.budget):
         print(p)
 
     return 0

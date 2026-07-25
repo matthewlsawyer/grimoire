@@ -19,10 +19,10 @@ _Reveal the shape of a system._
 
 ## Script
 
-Default seed budget `K = 20`.
+Default seed budget `K = 25`.
 
 ```bash
-python3 scripts/discover.py --target <spell-target-abs> --budget 20
+python3 scripts/discover.py --target <spell-target-abs> --budget 25
 ```
 
 - Always pass an absolute workspace `--target`. Never use `--target .`
