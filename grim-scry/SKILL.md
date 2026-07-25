@@ -4,9 +4,11 @@ description: >-
     Given a repository or workspace, produce a simple canonical understanding.
 ---
 
-_Reveal the shape of a system._
+# Grim Scry
 
-# Grim Scry Workflow
+_You must see before you act._
+
+## Workflow
 
 1. Resolve target (cwd / named repo; ask if unclear).
 2. Run Script; stdout lines are the seed paths (closed set).
@@ -84,3 +86,9 @@ API
    └─ AGENTS.md
       └─ⓘ Agent source of truth
 ```
+
+## Scripts
+
+| File | Role |
+| --- | --- |
+| [scripts/discover.py](scripts/discover.py) | Deterministic seed listing |
