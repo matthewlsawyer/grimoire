@@ -10,17 +10,15 @@ _Reveal the repos underfoot._
 # Grim Repo Workflow
 
 1. Resolve target (workspace root or named path).
-2. If `ledger.txt` is missing, empty, unreadable, or **regenerate** was requested:
+2. If `<agent-workspace>/.grimoire/grim-repo/<target>/ledger.txt` is missing, empty, unreadable, or **regenerate** was requested:
    - On **regenerate**: wipe `ledger.txt` first.
    - Discover → Lock-in (fresh selection; do not reuse prior) → write `ledger.txt` only if Lock-in accepts.
 3. Run Ledger; emit Output.
 
 ## Discover
 
-Default depth `N = 4`. Default budget `R = 10`.
-
 ```bash
-python3 scripts/discover.py --target <spell-target-abs> --depth 4 --budget 10
+python3 scripts/discover.py --target <spell-target-abs>
 ```
 
 - Absolute `--target` only; never `--target .`.
