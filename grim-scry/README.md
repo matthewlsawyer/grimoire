@@ -1,6 +1,6 @@
 # grim-scry
 
-_Reveal the shape of a system._
+_You must see before you act._
 
 Given a repository or workspace, distill meaning and emit one at-a-glance Scry Lantern in chat.
 
