@@ -3,8 +3,9 @@
 Deterministic discovery for `/grim-scry` via find(1).
 
 - find for seed basenames under target; does not honor gitignore
-- Prunes `.git` dirs only (speed); skips symlinks via find default
-- Basename post-filter -> shallow-first sort -> budget K
+- Prunes known vendor/build/cache dir names (see PRUNE_DIR_NAMES); skips symlinks via find default
+- Seed basenames from SEED_BASENAME_PATTERNS (find -iname + post-filter)
+- Shallow-first sort -> budget K
 - Flat seed paths on stdout (one per line)
 
 Does not read seed contents, distill, or write artifacts.
@@ -13,9 +14,47 @@ Does not read seed contents, distill, or write artifacts.
 from __future__ import annotations
 
 import argparse
+import fnmatch
 import os
 import subprocess
 import sys
+
+# Directory names: any path segment match prunes the subtree (find + post-filter).
+PRUNE_DIR_NAMES: frozenset[str] = frozenset(
+    {
+        ".git",
+        "node_modules",
+        "vendor",
+        ".venv",
+        "venv",
+        "__pycache__",
+        ".pnpm-store",
+        ".yarn",
+        "dist",
+        "build",
+        "_site",
+        ".next",
+        ".nuxt",
+        "target",
+        "coverage",
+        ".turbo",
+    }
+)
+
+# Basename globs for seed files (-iname in find; case-insensitive fnmatch in Python).
+SEED_BASENAME_PATTERNS: tuple[str, ...] = (
+    "readme",
+    "readme.*",
+    "agents.md",
+    "agents*.md",
+    "claude.md",
+    "skill.md",
+    "index",
+    "index.md",
+    "index.yaml",
+    "index.yml",
+    "index.json",
+)
 
 
 def to_display_file(rel: str) -> str:
@@ -29,72 +68,55 @@ def segments(rel_path: str) -> list[str]:
     return [s for s in p.split("/") if s]
 
 
+def is_under_pruned_dir(rel_path: str) -> bool:
+    parts = segments(rel_path)
+    if len(parts) <= 1:
+        return False
+    return any(part in PRUNE_DIR_NAMES for part in parts[:-1])
+
+
 def is_seed_file(name: str) -> bool:
     lower = name.lower()
-    if lower == "readme" or lower.startswith("readme."):
-        return True
-    if name in {"AGENTS.md", "CLAUDE.md"} or lower in {"agents.md", "claude.md"}:
-        return True
-    if name == "SKILL.md" or lower == "skill.md":
-        return True
-    if lower in {"index", "index.md", "index.yaml", "index.yml", "index.json"}:
-        return True
-    if name.endswith(".md") and name.upper().startswith("AGENTS"):
-        return True
-    return False
+    return any(fnmatch.fnmatch(lower, pattern.lower()) for pattern in SEED_BASENAME_PATTERNS)
+
+
+def _find_or_name_args(names: frozenset[str] | tuple[str, ...]) -> list[str]:
+    ordered = sorted(names) if isinstance(names, frozenset) else list(names)
+    args: list[str] = ["("]
+    for i, name in enumerate(ordered):
+        if i > 0:
+            args.append("-o")
+        args.extend(["-name", name])
+    args.append(")")
+    return args
+
+
+def _find_or_iname_args(patterns: tuple[str, ...]) -> list[str]:
+    args: list[str] = ["("]
+    for i, pattern in enumerate(patterns):
+        if i > 0:
+            args.append("-o")
+        args.extend(["-iname", pattern])
+    args.append(")")
+    return args
+
+
+def _find_prune_args() -> list[str]:
+    return [*_find_or_name_args(PRUNE_DIR_NAMES), "-type", "d", "-prune"]
 
 
 def find_candidates(target_root: str) -> list[str]:
-    """Absolute paths from find(1); prune .git; match seed basenames."""
+    """Absolute paths from find(1); prune vendor/build dirs; match seed basenames."""
     proc = subprocess.run(
         [
             "find",
             target_root,
-            "(",
-            "-name",
-            ".git",
-            "-type",
-            "d",
-            "-prune",
-            ")",
+            *_find_prune_args(),
             "-o",
             "(",
             "-type",
             "f",
-            "(",
-            "-iname",
-            "readme",
-            "-o",
-            "-iname",
-            "readme.*",
-            "-o",
-            "-iname",
-            "agents.md",
-            "-o",
-            "-iname",
-            "agents*.md",
-            "-o",
-            "-iname",
-            "claude.md",
-            "-o",
-            "-iname",
-            "skill.md",
-            "-o",
-            "-iname",
-            "index",
-            "-o",
-            "-iname",
-            "index.md",
-            "-o",
-            "-iname",
-            "index.yaml",
-            "-o",
-            "-iname",
-            "index.yml",
-            "-o",
-            "-iname",
-            "index.json",
-            ")",
+            *_find_or_iname_args(SEED_BASENAME_PATTERNS),
             "-print",
             ")",
         ],
@@ -118,12 +140,15 @@ def discover(target_root: str, budget: int) -> list[str]:
         name = os.path.basename(abs_path)
         if not is_seed_file(name):
             continue
+        rel = os.path.relpath(abs_path, target_root)
+        display = to_display_file(rel)
+        if is_under_pruned_dir(display):
+            continue
         key = os.path.realpath(abs_path)
         if key in seen:
             continue
         seen.add(key)
-        rel = os.path.relpath(abs_path, target_root)
-        found.append(to_display_file(rel))
+        found.append(display)
 
     found.sort(key=lambda p: (len(segments(p)), p))
     return found[:budget]
@@ -141,8 +166,8 @@ def main() -> int:
     ap.add_argument(
         "--budget",
         type=int,
-        default=25,
-        help="Max ranked seed paths to emit (default 25).",
+        default=50,
+        help="Max ranked seed paths to emit (default 50).",
     )
     args = ap.parse_args()
 
