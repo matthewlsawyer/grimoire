@@ -21,13 +21,15 @@ _You must see before you act._
 
 ## Script
 
-Default seed budget `K = 25`.
+Default seed budget `K = 50`.
+
+From the skill root directory, run:
 
 ```bash
-python3 scripts/discover.py --target <spell-target-abs> --budget 25
+python3 <skill-root>/scripts/discover.py --target <absolute_target_filepath> --budget 50
 ```
 
-- Always pass an absolute workspace `--target`. Never use `--target .`
+- Always pass an absolute workspace to `--target`. Never use `--target .`
 - Stdout (closed set): flat seed paths, one `./rel` per line. No section headers.
 - Script lists only. Agent reads seed contents. No inventory on disk. No in-session `find`.
 - Do not invent discovery scripts at runtime.
@@ -49,24 +51,26 @@ Ideas first. Implementers hung underneath concepts. Hang named commands under th
 
 Rules:
 - Prefer vertical trees; largest concepts win.
-- Sparse `ⓘ` / `▶` - short clause; primary named commands only.
+- One required `ⓘ` annotation under workspace header, before divider.
+- Moderate use of annotation in concept trees; ideas not captured in tree.
+- Use `▶` for execution branches - primary named commands only.
 
 Style:
 - Hierarchy branch glyphs: `│`, `├─`, `└─`.
 - Annotation glyphs: `├─ⓘ`, `└─ⓘ`, `─ⓘ`.
 - Command glyphs: `├─▶`, `└─▶`, `─▶`.
-- Divider glyph: `╞══════════════════◆`
+- Divider glyph: `╞══════════════════◆`.
 - Indent each level; continue ancestors with `│`.
 - `├─` / `├─ⓘ` / `├─▶` non-final sibling; `└─` / `└─ⓘ` / `└─▶` final sibling.
 
 Rules above are authoritative; below is drawing guide only.
 
 ```text
-API
+Workspace
 ├─ⓘ Go todo api surface
 ╞══════════════════◆
 ├─ Runtime
-│  ├─ⓘ Runtime descriptions
+│  ├─ⓘ Runtime complexities
 │  ├─ server/
 │  └─ client/
 │
@@ -76,7 +80,7 @@ API
 │
 ├─ Quality
 │  ├─▶ npm audit
-│  │   └─ⓘ full repo auit
+│  │   └─ⓘ full repo audit
 │  └─▶ npm test
 │
 ├─ Docs
@@ -86,9 +90,3 @@ API
    └─ AGENTS.md
       └─ⓘ Agent source of truth
 ```
-
-## Scripts
-
-| File | Role |
-| --- | --- |
-| [scripts/discover.py](scripts/discover.py) | Deterministic seed listing |

@@ -17,6 +17,24 @@ Viewport is the spell. Ideas hang first; implementers and named commands hang un
 
 Inventory and lantern stay session-only.
 
+## Usage
+
+Call `/grim-scry` with a target (local or remote) or let it infer the current workspace.
+
+```text
+# specific project
+/grim-scry projects/site/
+
+# workspace
+/grim-scry .
+
+# inferred workspace
+/grim-scry
+
+# remote repository
+/grim-scry https://github.com/basecamp/omarchy
+```
+
 ## Scripts
 
 | File | Role |
