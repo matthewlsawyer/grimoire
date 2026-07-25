@@ -1,67 +1,89 @@
-
-| Field    | Value                                          |
-| -------- | ---------------------------------------------- |
-| Target   | [omarchy](https://github.com/basecamp/omarchy) |
-| Model    | Composer 2.5                                   |
-| Ran with | Cursor                                         |
-| Runtime  | 12s                                            |
-| Date     | 2026-07-24                                     |
+| Field | Value |
+| --- | --- |
+| Target | [omarchy](https://github.com/basecamp/omarchy) |
+| Model | Composer 2.5 |
+| Ran with | Cursor |
+| Prompt | `/grim-scry https://github.com/basecamp/omarchy` |
+| Runtime | 19s including git clone |
+| Date | 2026-07-24 |
 
 # Grim Scry: Omarchy
 
-Opinionated Arch-based desktop distro: Hyprland compositor, one Quickshell `omarchy-shell`, and an `omarchy-*` CLI over install/config/themes and pluginized UI.
+Opinionated Arch Linux desktop (Hyprland + Quickshell shell) shipped as a git-managed system tree with a unified `omarchy` CLI and plugin-hosted UI.
 
 ```text
 Omarchy
-├─ⓘ Beautiful, modern & opinionated Linux (DHH); omarchy.org; MIT
+├─ⓘ Arch + Hyprland distro; runtime via $OMARCHY_PATH (uwsm session)
 ╞══════════════════◆
-├─ Product surface
-│  ├─ default/omarchy-skill/SKILL.md
-│  │  └─ⓘ End-user ~/.config customization; not source dev
-│  └─ README.md
-│
-├─ Contributor guidance
-│  └─ AGENTS.md
-│     ├─ⓘ omarchy-* commands; metadata in bin/; $OMARCHY_PATH
-│     ├─ install/ · config/ · themes/ · migrations/
-│     ├─▶ ./test/all
-│     ├─▶ ./test/cli
-│     ├─▶ ./test/shell
-│     └─▶ omarchy-restart-shell
+├─ CLI
+│  ├─ bin/omarchy
+│  │  └─ⓘ Routes omarchy-*; GROUP_DESCRIPTIONS is authoritative
+│  ├─ bin/
+│  │  └─ⓘ # omarchy: metadata in first 80 lines (group, summary, args, ...)
+│  └─▶ omarchy commands
+│     └─ⓘ Discovery for users and agents
 │
 ├─ Omarchy shell
-│  ├─ shell/README.md
-│  │  ├─ⓘ Single long-running Quickshell; Hyprland autostart
-│  │  ├─ shell.qml · services/ · plugins/
-│  │  ├─ ~/.config/omarchy/shell.json
-│  │  ├─▶ omarchy-shell shell ping
-│  │  ├─▶ omarchy plugin add
-│  │  └─▶ omarchy plugin update
-│  │
-│  ├─ shell/plugins/README.md
-│  │  └─ⓘ First-party manifest.json plugins (bar, panels, services, …)
-│  │
-│  ├─ shell/plugins/bar/README.md
-│  │  ├─ⓘ omarchy.bar; layout in shell.json
-│  │  └─▶ omarchy bar plugin add
-│  │
-│  └─ shell/plugins/panels/tailscale/README.md
-│     ├─ⓘ omarchy.tailscale bar-widget
-│     └─▶ omarchy bar plugin add omarchy.tailscale
+│  ├─ shell/
+│  │  ├─ shell.qml
+│  │  ├─ services/
+│  │  │  ├─ PluginRegistry.qml
+│  │  │  └─ BarWidgetRegistry.qml
+│  │  └─ plugins/
+│  │     ├─ bar/
+│  │     ├─ panels/
+│  │     ├─ menu/
+│  │     └─ ...
+│  ├─ⓘ One Quickshell process per session; Hyprland autostart quickshell -p
+│  ├─▶ omarchy-shell shell ping
+│  ├─▶ omarchy-restart-shell
+│  └─▶ omarchy plugin add | update | clone
 │
-└─ User CLI (from shipped skill)
-   ├─▶ omarchy commands
-   ├─▶ omarchy refresh
-   ├─▶ omarchy theme set
-   └─▶ omarchy update
+├─ Bar & widgets
+│  ├─ shell/plugins/bar/
+│  ├─ shell/plugins/panels/
+│  │  └─ tailscale/
+│  │     └─ⓘ omarchy.tailscale bar-widget + panel
+│  └─▶ omarchy bar plugin add
+│
+├─ Config & themes
+│  ├─ config/
+│  │  └─ⓘ Defaults copied to ~/.config/
+│  ├─ default/themed/*.tpl
+│  ├─ themes/*/colors.toml
+│  └─▶ omarchy-refresh-config
+│
+├─ Install & upgrade
+│  ├─ install/
+│  ├─▶ omarchy-setup-system
+│  ├─▶ omarchy-setup-hardware
+│  ├─▶ omarchy-finalize-user
+│  └─▶ omarchy-upgrade-to-quattro
+│
+├─ Migrations
+│  ├─ migrations/
+│  └─▶ omarchy-migrate
+│
+├─ Quality
+│  ├─▶ ./test/all
+│  ├─▶ ./test/cli
+│  └─▶ ./test/shell
+│
+├─ End-user skill
+│  └─ default/omarchy-skill/SKILL.md
+│     └─ⓘ ~/.config customization; not source dev
+│
+└─ Guidance
+   └─ AGENTS.md
+      └─ⓘ Bash style, helpers, shell IPC, acceptance via omarchy-iso
 ```
 
 # Summary
 
-[Omarchy](https://github.com/basecamp/omarchy) is Basecamp’s opinionated Linux desktop stack: Arch underneath, Hyprland for the compositor, and a single **Quickshell** process (`shell/`) that hosts the bar, menus, overlays, panels, and headless services as **manifest-driven plugins**. User-facing behavior is exposed through the `omarchy` **router** and many `omarchy-`* helpers (themes, refresh, capture, packages, setup, updates); shipped defaults live under `config/` and `themes/`, with install/finalization leaves under `install/` and per-user migrations under `migrations/`. `AGENTS.md` is the repo’s engineering contract (bash style, command metadata, tests, visual verification, shell IPC). The bundled `default/omarchy-skill` targets **installed-system customization** in `~/.config/`, not hacking `/usr/share/omarchy/`.
+[basecamp/omarchy](https://github.com/basecamp/omarchy) is the source tree for Omarchy: a polished Arch-based desktop built around Hyprland and a single long-running Quickshell shell. User-facing behavior is exposed through `bin/omarchy` and many `omarchy-*` helpers (packages, themes, capture, refresh/restart, plugins). The desktop UI is not a sprawl of separate Quickshell apps; bar, menus, panels, overlays, and services load as plugins under `shell/`, configured primarily via `~/.config/omarchy/shell.json` with first-party code in `shell/plugins/`. Defaults and theming live under `config/`, `default/`, and `themes/`; installation and per-user finalization are orchestrated from `install/` and dedicated setup binaries. `AGENTS.md` is the contributor contract (command naming, metadata, migrations, tests, visual verification). Shipped `default/omarchy-skill/SKILL.md` targets installed-system customization, not hacking this repo.
 
-**Observations:**
+Observations:
 
-- The shell is deliberately **one process**: panels and menus are **summoned via IPC** (`bin/omarchy-shell` → `shell` target) instead of spawning extra Quickshell instances.
-- **Customization splits cleanly**: end users edit `~/.config/` and `shell.json`; first-party QML under `shell/plugins/` is cloned to `~/.config/omarchy/plugins/` when users need forks.
-- **Third-party shell plugins** are git checkouts with interactive `omarchy plugin` flows; they run **unsandboxed** inside `omarchy-shell`, so the installer emphasizes review before enable.
+- The shell architecture is the structural bet: one process, plugin manifests, `omarchy-shell` IPC (`summon`, `hide`, `listPlugins`, ...) instead of cold-starting Quickshell per surface.
+- CLI surface is intentionally wide but routed: prefix groups in `bin/omarchy` plus comment metadata on each command; contributors are told not to duplicate prefix lists in docs.
+- Seeds under-read the repo (only seven markdown entry points at budget 25); most of `applications/`, `docs/`, and `install/` detail never entered the crawl - shape above leans on `AGENTS.md` and shell README depth.
