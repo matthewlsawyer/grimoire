@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Read-only helper for `/grim-repo`: live nested-repo status board.
+Read-only helper for `/grim-repo`: live nested-repo census.
 
 - find(1) for nested `.git` roots, then branch + diff per repo
 - Unicode board format (diff / branch)
@@ -206,7 +206,7 @@ def token_diff(repo_path: str) -> str:
     return f"+{added} -{deleted}"
 
 
-def render_ledger(target_leaf: str, blocks: List[RepoBlock]) -> str:
+def render_census(target_leaf: str, blocks: List[RepoBlock]) -> str:
     """Forest under target leaf: divider, then repos with ▲ diff, ▲ sync, ● branch."""
     lines: List[str] = [
         f"{target_leaf}/",
@@ -260,7 +260,7 @@ def main() -> int:
 
     if blocks:
         target_leaf = os.path.basename(target_root.rstrip("/"))
-        print(render_ledger(target_leaf, blocks))
+        print(render_census(target_leaf, blocks))
 
     if errors:
         for err in errors:

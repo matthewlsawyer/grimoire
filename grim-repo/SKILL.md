@@ -12,14 +12,14 @@ _What lives must be named._
 ## Workflow
 
 1. Resolve target (workspace root or named path).
-2. Run ledger; emit output.
+2. Run census; emit output.
 
-## Ledger
+## Census
 
 From the skill root directory, run:
 
 ```bash
-python3 <skill-root>/scripts/ledger.py --target <absolute_target_filepath>
+python3 <skill-root>/scripts/census.py --target <absolute_target_filepath>
 ```
 
 - Always pass an absolute workspace to `--target`. Never use `--target .`
@@ -28,4 +28,4 @@ python3 <skill-root>/scripts/ledger.py --target <absolute_target_filepath>
 ## Output
 
 1. `# Grim Repo: <project>` outside the fence
-2. `text` fence: full ledger stdout
+2. `text` fence: full census stdout

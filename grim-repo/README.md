@@ -7,26 +7,26 @@ Inject a live nested-repo status board into the session: every git root under th
 ## Shape
 
 1. Resolve the target.
-2. Run ledger (find roots + status draw).
+2. Run census (find roots + status draw).
 3. Emit the board in chat.
 
 ## Usage
 
-Invoke the skill directly to see the ledger.
+Invoke the skill directly to see the census.
 
 ```text
 /grim-repo
 ```
 
-### Reason with the ledger
+### Reason with the census
 
-The ledger is a fact surface -> dirty trees, branches, which nested root is which.
+The census is a fact surface -> dirty trees, branches, which nested root is which.
 
 The spell earns its place when used in session: where to work, what is out of sync; ask questions and let it help guide your next step.
 
 ## Example output
 
-`ledger.py` stdout (agent fences as-is):
+`census.py` stdout (agent fences as-is):
 
 ```text
 throneroom/
@@ -55,4 +55,4 @@ throneroom/
 
 | File | Role |
 | --- | --- |
-| [scripts/ledger.py](scripts/ledger.py) | Find nested git roots + live status board |
+| [scripts/census.py](scripts/census.py) | Find nested git roots + live status board |
