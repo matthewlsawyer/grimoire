@@ -5,10 +5,10 @@
 │  ◆ grimoire   ║
 │  ══+═════+══  ║
 │               ║
-|  / ◇─▶ cast   ║
+|  / ~─▶ cast   ║
 │               ║
 │  ────┬┼┬────  ║
-│     + ◆ +     ║
+│     ◇ ◆ ◇     ║
 ╰≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡╝
 
 A spellbook of at-a-glance agent skills.
@@ -18,8 +18,9 @@ A spellbook of at-a-glance agent skills.
 
 | Spell | Purpose |
 | --- | --- |
-| [grim-scry](grim-scry/README.md) | Reveal project meaning |
-| [grim-repo](grim-repo/README.md) | Nested git repo status |
+| [grim-scry](grim-scry/README.md) | Conceptual graph of target project |
+| [grim-repo](grim-repo/README.md) | Nested git repo census |
+| [grim-weave](grim-weave/README.md) | Thread a token through the repo into a ledger |
 
 ## Glyph Dictionary
 
@@ -27,11 +28,12 @@ A spellbook of at-a-glance agent skills.
 | --- | --- |
 | `│` `├` `└` `─` | hierarchy (structure) |
 | `╞` `═` | divider |
+| `◆` `◇` | terminator |
 | `ⓘ` | annotation |
+| `≣` | concept / group / thread |
 | `▶` | execution |
 | `▲` | status / delta / metric |
 | `●` | state / snapshot |
-| `◆` | terminator |
 
 ## Examples
 
@@ -41,12 +43,13 @@ One directory per spell: `examples/<spell>/`. One file per run.
 | --- | --- | --- |
 | [grim-scry/omarchy](examples/grim-scry/omarchy.md) | 2026-07-24 | Composer 2.5 |
 | [grim-repo/throneroom](examples/grim-repo/throneroom.md) | 2026-07-24 | Composer 2.5 |
+| [grim-weave/grim-scry](examples/grim-weave/grim-scry.md) | 2026-07-26 | Composer 2.5 |
 
 ## Roadmap
 
 - [x] grim-scry
 - [x] grim-repo
-- [ ] grim-weave, grim-trace, grim-adr
+- [x] grim-weave
 
 ## Install
 
@@ -57,3 +60,15 @@ From the project that should receive the spells:
 ```
 
 Copies each skill into `.agents/skills/<skill-name>/` under the invoking directory.
+
+## Tests
+
+From this directory (`projects/grimoire/`):
+
+```bash
+python3 tests/grim-weave/test.py
+python3 tests/grim-scry/test.py
+python3 tests/grim-repo/test.py
+```
+
+Standard-library `unittest` only. Spell scripts are loaded by path via [`tests/load_script.py`](tests/load_script.py).
