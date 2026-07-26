@@ -1,8 +1,8 @@
 ---
-name: grim-scry
+name: grimscry
 description: >-
   Given a repository or workspace, produce a simple canonical understanding.
-  Use when the user invokes grim-scry or wants an at-a-glance conceptual map
+  Use when the user invokes grimscry or wants an at-a-glance conceptual map
   of a project.
 ---
 
@@ -10,7 +10,7 @@ description: >-
 
 _You must see before you act._
 
-Given a repository or workspace, distill meaning and emit one at-a-glance Scry Lantern in chat. Viewport is the spell: ideas hang first; implementers and named commands hang underneath. Inventory and lantern stay session-only.
+Given a repository or workspace, distill meaning and emit one at-a-glance **Scry Lantern** in chat. Viewport is the spell: ideas hang first; implementers and named commands hang underneath. Inventory and lantern stay session-only.
 
 ## Inputs
 
@@ -29,7 +29,7 @@ Given a repository or workspace, distill meaning and emit one at-a-glance Scry L
 
 ## Discovery
 
-Build the Seed set in-session (grep, glob, read). Do not run helper scripts from this skill directory.
+Build the Seed set in-session (grep, glob, read).
 
 **Prune** - skip any path with a segment in this closed set:
 
@@ -43,7 +43,7 @@ Build the Seed set in-session (grep, glob, read). Do not run helper scripts from
 
 **Closed read boundary** - after the Seed set is fixed, no further repo discovery. No expansion beyond those paths.
 
-Discovery does not honor `.gitignore` unless the Throne asks otherwise.
+Discovery does not honor `.gitignore` unless the user asks otherwise.
 
 ## Output
 
@@ -68,7 +68,7 @@ Rules:
 - Use `≣` for concept group trunks.
 - Use `▶` for execution branches - primary named commands only.
 
-Style (see [grimoire Glyph Dictionary](../README.md#glyph-dictionary)):
+Style:
 
 - Hierarchy branch glyphs: `│`, `├─`, `└─`.
 - Annotation glyphs: `├─ⓘ`, `└─ⓘ`, `─ⓘ`.
@@ -110,13 +110,13 @@ Workspace
 
 ## Usage
 
-Call `/grim-scry` with a target or infer the current workspace.
+Call `/grimscry` with a target or infer the current workspace.
 
 ```text
-/grim-scry projects/site/
-/grim-scry .
-/grim-scry
-/grim-scry https://github.com/example/repo
+/grimscry packages/api/
+/grimscry .
+/grimscry
+/grimscry https://github.com/example/repo
 ```
 
 ## Boundaries

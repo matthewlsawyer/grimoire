@@ -1,8 +1,8 @@
 ---
-name: grim-repo
+name: grimrepo
 description: >-
   Given a workspace or directory, reveal nested git repositories and their
-  current status. Use when the user invokes grim-repo or needs a nested-repo
+  current status. Use when the user invokes grimrepo or needs a nested-repo
   census board.
 ---
 
@@ -63,12 +63,14 @@ For each repo (shallow-first), one subtree:
 │  └─● <branch>
 ```
 
-Use `└─` for the last repo at the forest level; `│` between sibling repos. Indent continuation with `│  ` or three spaces on the last repo per drawing guide below.
+- Use `└─` for the last repo at the forest level
+- `│` between sibling repos
+- Indent continuation with `│  ` or three spaces on the last repo per drawing guide below
 
 Drawing guide:
 
 ```text
-throneroom/
+workspace/
 ╞══════════════════◆
 │
 ├─ ./
@@ -76,24 +78,30 @@ throneroom/
 │  ├─▲ +0 -0
 │  └─● main
 │
-├─ projects/dotfiles/
+├─ packages/api/
 │  ├─▲ ↑1 ↓0
 │  ├─▲ +8 -8
 │  └─● main
 │
-└─ projects/site/
+└─ apps/web/
    ├─▲ ↑0 ↓2
    ├─▲ +82 -2
    └─● main
 ```
 
-Glyphs: see [grimoire Glyph Dictionary](../README.md#glyph-dictionary).
+Glyphs: 
+
+- `│` `├` `└` `─` hierarchy
+- `╞` `═` divider
+- `◆` terminator
+- `▲` status / delta
+- `●` branch or snapshot
 
 ## Usage
 
 ```text
-/grim-repo
-/grim-repo /path/to/workspace
+/grimrepo
+/grimrepo /path/to/workspace
 ```
 
 ## Boundaries
