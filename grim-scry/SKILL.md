@@ -53,15 +53,18 @@ Rules:
 - Prefer vertical trees; largest concepts win.
 - One required `ⓘ` annotation under workspace header, before divider.
 - Moderate use of annotation in concept trees; ideas not captured in tree.
+- Use `≣` for concept group trunks.
 - Use `▶` for execution branches - primary named commands only.
 
 Style:
 - Hierarchy branch glyphs: `│`, `├─`, `└─`.
 - Annotation glyphs: `├─ⓘ`, `└─ⓘ`, `─ⓘ`.
+- Concept glyphs: `├─≣`, `└─≣`, `─≣`.
 - Command glyphs: `├─▶`, `└─▶`, `─▶`.
 - Divider glyph: `╞══════════════════◆`.
 - Indent each level; continue ancestors with `│`.
-- `├─` / `├─ⓘ` / `├─▶` non-final sibling; `└─` / `└─ⓘ` / `└─▶` final sibling.
+- `├─` / `├─ⓘ` / `├─≣` / `├─▶` non-final sibling;
+- `└─` / `└─ⓘ` / `└─≣` / `└─▶` final sibling.
 
 Rules above are authoritative; below is drawing guide only.
 
@@ -69,24 +72,25 @@ Rules above are authoritative; below is drawing guide only.
 Workspace
 ├─ⓘ Go todo api surface
 ╞══════════════════◆
-├─ Runtime
+│
+├─≣ Runtime
 │  ├─ⓘ Runtime complexities
 │  ├─ server/
 │  └─ client/
 │
-├─ Packages
+├─≣ Packages
 │  └─ packages/core/
 │     └─ⓘ Main library
 │
-├─ Quality
+├─≣ Quality
 │  ├─▶ npm audit
-│  │   └─ⓘ full repo audit
+│  │  └─ⓘ full repo audit
 │  └─▶ npm test
 │
-├─ Docs
+├─≣ Docs
 │  └─▶ npm run docs
 │
-└─ Guidance
+└─≣ Guidance
    └─ AGENTS.md
       └─ⓘ Agent source of truth
 ```

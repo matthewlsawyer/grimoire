@@ -15,6 +15,7 @@ Opinionated Arch Linux desktop (Hyprland + Quickshell shell) shipped as a git-ma
 Omarchy
 ├─ⓘ Arch + Hyprland distro; runtime via $OMARCHY_PATH (uwsm session)
 ╞══════════════════◆
+│
 ├─ CLI
 │  ├─ bin/omarchy
 │  │  └─ⓘ Routes omarchy-*; GROUP_DESCRIPTIONS is authoritative
