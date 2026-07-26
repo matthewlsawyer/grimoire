@@ -10,47 +10,80 @@ description: >-
 
 _Follow the thread._
 
-Follow a single token through a workspace, revealing its provenance, relationships, and supporting evidence. Starting from a symbol, file, or concept, it produces a deterministic thread showing where it is defined, what it depends on, what depends on it, how it evolved, and where it is documented.
+Follow a single token through a workspace: bounded evidence, then an at-a-glance **Weave Ledger** in chat. Collection stays within caps; relationships and threads are agent-composed from evidence and reads. Do not write the ledger to disk.
+
+## Inputs
+
+| Input | Required | Holds |
+| --- | --- | --- |
+| `target` | yes | Absolute workspace root. Ask if unclear. |
+| `user token` | yes | File path, symbol, or concept phrase. |
+
+| Token shape | `token_kind` |
+| --- | --- |
+| `path/to/file.go`, `SKILL.md` | `file` |
+| `TodoService` (identifier) | `symbol` |
+| `log in`, multi-word phrase | `concept` |
 
 ## Workflow
 
-1. Resolve target (cwd / named repo) and **user token** (file path, symbol, or concept phrase). Ask if either is unclear.
-2. **Disambiguate** to `script_token` when the user token is unlikely to work as-is for Script; otherwise `script_token` = user token. Choose how in-session (no fixed search recipe). Ask if multiple anchors are equally valid; do not run Script until one `script_token` is chosen.
-3. Run Script with `script_token`; parse stdout JSON as the closed evidence set.
-4. Read **only** paths listed in `paths` plus any file you must open to interpret a `hits` line already in evidence. No further repo discovery.
+1. Resolve `target` and **user token**. Ask if either is unclear.
+2. **Disambiguate** to `search_token` when the user token is unlikely to work as-is for search; otherwise `search_token` = user token. In-session discovery allowed **only** for this choice. Ask if multiple anchors are equally valid; do not collect evidence until one `search_token` is chosen.
+3. **Evidence** - build a closed evidence packet in-session (see Evidence below).
+4. Read **only** paths in `paths` plus any file needed to interpret a `hits` line already in evidence. No further repo discovery.
 5. From evidence and those reads, reason about definition sites, depends-on, referenced-by, evolution, docs, and follow-on threads. Omit what evidence cannot support.
-6. Emit the Weave Ledger in chat. Do not write the ledger to disk.
+6. Emit Output.
 
 ## Disambiguation
 
-Outcome only: pick `script_token` for `--token` before Script runs. In-session discovery is allowed **only** for that choice—not for evidence after Script.
-
 - Skip when the user token is already a path, symbol, or literal grep needle.
 - Ledger title uses the **user token** (`# Grim Weave: <user token>`).
-- When user token ≠ `script_token`, note both in `Evidence:`.
+- When user token ≠ `search_token`, note both in `Evidence:`.
 
-## Script
+## Evidence
 
-From the skill root directory, run:
+Collect in-session (prefer `git grep`; else bounded ripgrep or line scan). Do not run helper scripts from this skill directory.
 
-```bash
-python3 <skill-root>/scripts/weave.py --target <absolute_target_dir> --token <script_token>
-```
+**Prune** - same directory segments as grim-scry Discovery (`.git`, `node_modules`, `vendor`, …).
 
-- Always pass an absolute workspace to `--target`. Never use `--target .`
-- Stdout: one JSON object (`token_kind`, `paths`, `hits`, `documents`, `commits`, `commits_order`, `git_available`).
-- Script collects occurrences and history only. Agent owns relationships and threads.
-- Do not invent collection scripts at runtime.
+**Caps** (hard stop when reached):
+
+| Cap | Value |
+| --- | --- |
+| `paths` | 40 |
+| `hits` (total) | 120 |
+| `hits` per path | 8 |
+| `commits` | 5 |
+| files scanned (fallback line scan) | 8000 |
+
+**Search**
+
+- `file`: path relative to target; hits on that path.
+- `symbol`: `git grep -F` / ripgrep; case-insensitive; flag `definition_candidate` when line matches declaration-shaped patterns for the language.
+- `concept`: phrase search; case-insensitive; prefer docs (`*.md`, `*.mdx`, `docs/`, `adr/`).
+
+**Commits** (when git available): pickaxe / `git log` on touched paths; merge newest-first; max 5. When git unavailable, `commits` empty.
+
+**Evidence packet** (session-only, before ledger):
+
+| Field | Shape |
+| --- | --- |
+| `token_kind` | `file` \| `symbol` \| `concept` |
+| `paths` | Closed read set (repo-relative) |
+| `hits` | Path, line, kind (`match` \| `definition_candidate`) |
+| `documents` | Doc-path subset of hits |
+| `commits` | Short sha + subject; newest first |
+| `git_available` | boolean |
 
 ## Output
 
 North star: one at-a-glance ledger for the token.
 
-1. Emit one Weave Ledger:
-  - `# Grim Weave: <user token>` outside the fence
-  - One-line distillation outside the fence (agent judgment; grounded in evidence)
-  - `text` fence: tree only
-2. `Evidence:` - ≤3 `-` bullets; what was discovered by weave
+| Part | Required | Holds |
+| --- | --- | --- |
+| Title + one-line distillation | yes | Outside fence |
+| Weave Ledger | yes | `text` fence: tree only |
+| `Evidence:` | yes | ≤3 `-` bullets; what was collected |
 
 ### Weave Ledger
 
@@ -62,8 +95,8 @@ Sections (use `≣` trunks; omit empty sections):
 | Trunk | Content |
 | --- | --- |
 | Definition | Defining paths / symbols from `definition_candidate` hits and file reads |
-| Relationships | `Depends On` and `Referenced By` - named symbols the agent infers from read files |
-| Provenance | `Commits` (`●` + short sha + subject from evidence, **newest first**); `Documents` from `documents` |
+| Relationships | `Depends On` and `Referenced By` - named symbols inferred from read files |
+| Provenance | `Commits` (`●` + short sha + subject, **newest first**); `Documents` from `documents` |
 | Threads | `▶` follow-on symbols worth a nested `/grim-weave` (high-signal only) |
 
 Provenance layout:
@@ -71,7 +104,7 @@ Provenance layout:
 - Omit `Commits` when evidence has no commits.
 - Omit `Documents` when `documents` is empty.
 
-Style (matches Grimoire glyph dictionary):
+Style (see [grimoire Glyph Dictionary](../README.md#glyph-dictionary)):
 
 - Hierarchy: `│`, `├─`, `└─`
 - Annotation: `├─ⓘ`, `└─ⓘ`
@@ -79,8 +112,6 @@ Style (matches Grimoire glyph dictionary):
 - Thread: `├─▶`, `└─▶`
 - Commit snapshot: `├─●`, `└─●`
 - Divider: `╞══════════════════◆`
-- Indent each level; continue ancestors with `│`
-- `├─` non-final sibling; `└─` final sibling
 
 Rules above are authoritative; below is drawing guide only.
 
@@ -118,3 +149,17 @@ TodoService
    ├─▶ TodoStore
    └─▶ EventBus
 ```
+
+## Usage
+
+```text
+/grim-weave grim-scry
+/grim-weave projects/grimoire grim-scry
+/grim-weave discover.py
+/grim-weave "log in"
+```
+
+## Boundaries
+
+- Session-only viewport; no disk artifacts.
+- No collection or reads beyond Evidence caps and closed `paths`.
