@@ -31,6 +31,7 @@ The spell earns its place when used in session: where to work, what is out of sy
 ```text
 throneroom/
 ╞══════════════════◆
+│
 ├─ ./
 │  ├─▲ ↑0 ↓0
 │  ├─▲ +0 -0
