@@ -21,19 +21,38 @@ Inject a live nested-repo status board into the session: every git root under th
 ## Workflow
 
 1. Resolve `target` to an absolute directory.
-2. **Census** - discover git roots and collect status per root (see Census below).
-3. **Draw** the status board in-session per Output (agent composes the tree; no script stdout).
-4. Emit Output. Do not write the board to disk.
+2. **Census** - run Script (see Script below).
+3. Emit Output: fence **full script stdout** as the board. Do not redraw. Re-run Script per Script policy if the census is stale or wrong for the ask.
+4. Do not write the board to disk.
+
+## Script
+
+From the skill root directory, run:
+
+```bash
+python3 <skill-root>/scripts/census.py --target <absolute_workspace_root>
+```
+
+- Always pass an absolute workspace to `--target`. Never use `--target .`
+- Stdout is the complete census board (Unicode tree). Fence it as-is.
+
+### Script policy
+
+- Script stdout is the complete census board; fence as-is. Do not redraw or reinterpret metrics into a second viewport.
+- **Prefer** `scripts/census.py` for the board (do not skip the script and freestyle git status across the tree).
+- **Re-run** when the target changes, the board looks incomplete, or the ask needs a fresh census. Briefly note what changed vs the prior run.
+- **Read-only** - do not edit script files in-session; read the script only to understand behavior.
+- Supplement is rarely needed; re-run on the correct absolute `target` first.
 
 ## Census
 
-Discover every git repository root under `target`:
+The script discovers every git repository root under `target`:
 
 - Treat `.git` as directory or gitfile (worktree/submodule layouts).
 - Sort roots shallow-first; dedupe by realpath of repo root.
 - Display path: `./` for the target root repo, else `relpath/` under target.
 
-Per repo, collect:
+Per repo:
 
 | Token | Glyph | Meaning |
 | --- | --- | --- |
@@ -41,20 +60,21 @@ Per repo, collect:
 | diff | `▲` | `+added -deleted` vs `HEAD`, including untracked non-binary line counts |
 | branch | `●` | Current branch, or `DETACHED@<shortsha>` |
 
-Use `git` in the repo root with C locale when parsing output. If a repo fails, note in chat and omit or partial that row; do not invent metrics.
+If a repo fails, note in chat and omit or partial that row; do not invent metrics.
 
 ## Output
 
 | Part | Required | Holds |
 | --- | --- | --- |
 | Title | yes | `# Grim Repo: <project>` outside the fence |
-| Board | yes | `text` fence: full census tree |
+| Board | yes | `text` fence: full census stdout |
 
 ### Board layout
 
-Header: `<basename(target)>/`, then divider `╞══════════════════◆`, then spacer line `│`.
+The script draws:
 
-For each repo (shallow-first), one subtree:
+- Header: `<basename(target)>/`, then divider `╞══════════════════◆`, then spacer line `│`.
+- One subtree per repo (shallow-first):
 
 ```text
 ├─ <repo_display>/
@@ -63,33 +83,7 @@ For each repo (shallow-first), one subtree:
 │  └─● <branch>
 ```
 
-- Use `└─` for the last repo at the forest level
-- `│` between sibling repos
-- Indent continuation with `│  ` or three spaces on the last repo per drawing guide below
-
-Drawing guide:
-
-```text
-workspace/
-╞══════════════════◆
-│
-├─ ./
-│  ├─▲ ↑0 ↓0
-│  ├─▲ +0 -0
-│  └─● main
-│
-├─ packages/api/
-│  ├─▲ ↑1 ↓0
-│  ├─▲ +8 -8
-│  └─● main
-│
-└─ apps/web/
-   ├─▲ ↑0 ↓2
-   ├─▲ +82 -2
-   └─● main
-```
-
-Glyphs: 
+Glyphs:
 
 - `│` `├` `└` `─` hierarchy
 - `╞` `═` divider
