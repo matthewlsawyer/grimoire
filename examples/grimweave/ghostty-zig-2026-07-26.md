@@ -1,72 +1,63 @@
 | Field | Value |
 | --- | --- |
-| Target | [ghostty](https://github.com/ghostty-org/ghostty) (local workspace) |
-| Model | Composer 2.5 |
+| Target | [ghostty](https://github.com/ghostty-org/ghostty) (`/Users/matthewlsawyer/Code/test_4/ghostty`) |
+| Model | Composer |
 | Ran with | Cursor |
 | Prompt | `/grimweave zig` |
-| Token | `zig` (concept) |
-| Runtime | ~12s (docs/build grep + reads) |
+| Token | `zig` (concept; weave script `token_kind`: symbol) |
+| Runtime | ~10s (weave evidence + closed-set reads) |
 | Date | 2026-07-26 |
 
 # Grim Weave: zig
 
-Zig is Ghostty’s implementation language and its primary build/test driver; macOS app packaging is the main exception.
+Zig is Ghostty’s primary language and build system: the shared core, `build.zig` orchestration, and pinned toolchain in `build.zig.zon`.
 
 ```text
 zig
-├─ⓘ Language + build system; `src/` core and root `zig build` orchestration
+├─ⓘ Primary implementation language and `zig build` entry for the repo
 ╞══════════════════◆
 │
 ├─≣ Definition
 │  ├─ build.zig
-│  │  ├─ minimum_zig_version ← build.zig.zon
-│  │  └─ buildpkg.requireZig (comptime)
+│  │  └─ⓘ `build()` root; `requireZig(minimum_zig_version)`; steps run/test/lib-vt/translations
 │  ├─ build.zig.zon
-│  │  └─ .minimum_zig_version = "0.16.0"
-│  ├─ src/build/
-│  │  └─ⓘ Config, steps, GhosttyZig modules (via buildpkg)
+│  │  └─ⓘ `.minimum_zig_version` (0.16.0); Zig package deps (libxev, zig_objc, …)
 │  └─ src/
-│     └─ⓘ Shared Zig core (AGENTS.md)
+│     └─ⓘ Shared Zig core (named in AGENTS.md; `**/*.zig` in CI path filters)
 │
 ├─≣ Relationships
 │  ├─ Depends On
-│  │  ├─ Zig toolchain (released version pinned in build.zig.zon)
-│  │  ├─ build.zig.zon dependencies (libxev, zig_objc, …)
-│  │  └─ zig-out/ artifacts
+│  │  ├─ buildpkg (`src/build/main.zig` via `@import`)
+│  │  ├─ build.zig.zon (version + dependencies)
+│  │  └─ zig-out / .zig-cache (artifact dirs; gitignored)
 │  │
 │  └─ Referenced By
-│     ├─ AGENTS.md
-│     │  └─ zig build | test | fmt | libghostty-vt flags
-│     ├─ HACKING.md
-│     │  └─ zig build run, test, dist, valgrind, …
-│     ├─ PACKAGING.md
-│     │  └─ zig build for downstream packagers
-│     ├─ example/
-│     │  └─ zig build run (C API examples use Zig build, not C toolchain alone)
-│     ├─ test/fuzz-libghostty/
-│     ├─ src/benchmark/AGENTS.md
-│     └─ macos/AGENTS.md
-│        └─ⓘ zig build -Demit-macos-app=false for core; app via build.nu
+│     ├─ CMakeLists.txt (`zig build -Demit-lib-vt`; `zig` on PATH)
+│     ├─ .github/workflows/test.yml (zig-fmt, build-examples-zig, `**/*.zig`)
+│     ├─ HACKING.md / AGENTS.md (`zig build`, `zig fmt`, test filters)
+│     └─ README.md (libghostty as C and Zig library)
 │
 ├─≣ Provenance
 │  ├─ Commits
-│  │  ├─● e8525c0 Update to Zig 0.16.0
-│  │  ├─● f2a7652 mitchell's touchups
-│  │  └─● b513f1b deps: Update iTerm2 color schemes
+│  │  └─ ./
+│  │     ├─● 4c7252 Update VOUCHED list (#13437)
+│  │     ├─● d65cb5 build: link libghostty-vt on Apple hosts with native linker
+│  │     └─● d97a57 ci: test with Xcode 27
 │  │
 │  └─ Documents
 │     ├─ AGENTS.md
 │     ├─ HACKING.md
 │     ├─ PACKAGING.md
-│     └─ example/README.md
+│     └─ README.md
 │
 └─≣ Threads
    ├─▶ build.zig.zon
-   ├─▶ GhosttyZig
-   ├─▶ test-lib-vt
-   └─▶ example/zig-vt
+   ├─▶ minimum_zig_version
+   └─▶ libghostty-vt
 ```
 
 # Summary
 
-In Ghostty, **zig** names both the language of the shared core (`src/`) and the default developer interface: `build.zig` / `build.zig.zon` pin the compiler (currently **0.16.0**) and wire app, tests, libghostty-vt, fuzz, and bench steps. Continue with `/grimweave build.zig.zon` or `/grimweave GhosttyZig` for the build graph, or `/grimweave test-lib-vt` for the VT test slice.
+In this workspace, **zig** names both the language of the large **`src/`** tree and the **build system** centered on **`build.zig`**, which enforces **`minimum_zig_version`** from **`build.zig.zon`** (currently **0.16.0**) and exposes the everyday steps documented in **AGENTS.md** and **HACKING.md** (`zig build`, `zig build test`, `zig fmt`, lib-vt and WASM variants). CI and packaging treat Zig as the source of truth for compilation while **CMake** wraps **`zig build -Demit-lib-vt`** for downstream C consumers who still need **`zig` on PATH**. Evidence hit caps; the closed path set is mostly root build metadata and workflows, not individual `.zig` modules.
+
+Good follow-ups: `/grimweave build.zig.zon`, `/grimweave minimum_zig_version`, or `/grimweave libghostty-vt`.

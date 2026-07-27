@@ -4,7 +4,7 @@
 | Model | Composer 2.5 |
 | Ran with | Cursor |
 | Prompt | `/grimrepo` |
-| Runtime | 6s (nested root discovery + git status per repo) |
+| Runtime | 4s (nested root discovery + git status per repo) |
 | Date | 2026-07-26 |
 
 # Grim Repo: throneroom
