@@ -3,7 +3,7 @@
 | Target | [ghostty](https://github.com/ghostty-org/ghostty) (`/Users/matthewlsawyer/Code/test_4/ghostty`) |
 | Model | Composer |
 | Ran with | Cursor |
-| Prompt | `/grimweave zig` |
+| Prompt | `/grim-weave zig` |
 | Token | `zig` (concept; weave script `token_kind`: symbol) |
 | Runtime | ~10s (weave evidence + closed-set reads) |
 | Date | 2026-07-26 |
@@ -60,4 +60,4 @@ zig
 
 In this workspace, **zig** names both the language of the large **`src/`** tree and the **build system** centered on **`build.zig`**, which enforces **`minimum_zig_version`** from **`build.zig.zon`** (currently **0.16.0**) and exposes the everyday steps documented in **AGENTS.md** and **HACKING.md** (`zig build`, `zig build test`, `zig fmt`, lib-vt and WASM variants). CI and packaging treat Zig as the source of truth for compilation while **CMake** wraps **`zig build -Demit-lib-vt`** for downstream C consumers who still need **`zig` on PATH**. Evidence hit caps; the closed path set is mostly root build metadata and workflows, not individual `.zig` modules.
 
-Good follow-ups: `/grimweave build.zig.zon`, `/grimweave minimum_zig_version`, or `/grimweave libghostty-vt`.
+Good follow-ups: `/grim-weave build.zig.zon`, `/grim-weave minimum_zig_version`, or `/grim-weave libghostty-vt`.
