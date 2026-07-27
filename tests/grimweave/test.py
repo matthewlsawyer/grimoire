@@ -9,7 +9,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from load_script import load_script
 
-weave = load_script("grim-weave/scripts/weave.py", "grim_weave_weave")
+weave = load_script("grimweave/scripts/weave.py", "grimweave_weave")
 
 
 class CollectDocumentsTests(unittest.TestCase):
@@ -96,9 +96,12 @@ class WeaveNoGitTests(unittest.TestCase):
             root = Path(td)
             (root / "note.md").write_text("Hand charter\n", encoding="utf-8")
             evidence = weave.weave(str(root), "Hand")
+            self.assertEqual(evidence["kind"], weave.EVIDENCE_KIND)
+            self.assertEqual(evidence["caps"]["hits"], weave.MAX_HITS)
             self.assertFalse(evidence["git_available"])
-            self.assertEqual(evidence["commits"], [])
+            self.assertEqual(evidence["commit_groups"], [])
             self.assertEqual(evidence["commits_order"], "newest_first")
+            self.assertNotIn("commits", evidence)
 
 
 class CommitOrderTests(unittest.TestCase):
@@ -139,16 +142,78 @@ class CommitOrderTests(unittest.TestCase):
                 check=True,
                 env={**env, "GIT_AUTHOR_DATE": "2025-01-01T00:00:00", "GIT_COMMITTER_DATE": "2025-01-01T00:00:00"},
             )
-            commits = weave.collect_commits(
+            commits = weave.collect_commits_for_repo(
+                str(root),
                 str(root),
                 "marker",
                 "symbol",
                 ["./alpha.txt"],
-                git_ok=True,
             )
             self.assertGreaterEqual(len(commits), 2)
             self.assertIn("newer", commits[0]["subject"])
             self.assertIn("older", commits[1]["subject"])
+
+
+class NestedRepoCommitGroupsTests(unittest.TestCase):
+    def test_commit_groups_per_git_root(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            env = {
+                **__import__("os").environ,
+                "GIT_AUTHOR_NAME": "t",
+                "GIT_AUTHOR_EMAIL": "t@example.com",
+                "GIT_COMMITTER_NAME": "t",
+                "GIT_COMMITTER_EMAIL": "t@example.com",
+            }
+            try:
+                subprocess.run(
+                    ["git", "init"],
+                    cwd=root,
+                    check=True,
+                    capture_output=True,
+                    env=env,
+                )
+            except subprocess.CalledProcessError:
+                self.skipTest("git init unavailable in this environment")
+
+            parent_file = root / "parent.txt"
+            parent_file.write_text("parentneedle\n", encoding="utf-8")
+            subprocess.run(["git", "add", "parent.txt"], cwd=root, check=True, env=env)
+            subprocess.run(
+                ["git", "commit", "-m", "parent parentneedle"],
+                cwd=root,
+                check=True,
+                env=env,
+            )
+
+            nested = root / "nested"
+            nested.mkdir()
+            nested_file = nested / "child.txt"
+            nested_file.write_text("childneedle\n", encoding="utf-8")
+            subprocess.run(["git", "init"], cwd=nested, check=True, capture_output=True, env=env)
+            subprocess.run(
+                ["git", "add", "child.txt"],
+                cwd=nested,
+                check=True,
+                env=env,
+            )
+            subprocess.run(
+                ["git", "commit", "-m", "nested childneedle"],
+                cwd=nested,
+                check=True,
+                env=env,
+            )
+
+            evidence = weave.weave(str(root), "needle")
+            self.assertNotIn("commits", evidence)
+            groups = evidence["commit_groups"]
+            self.assertEqual(len(groups), 2)
+            self.assertEqual(groups[0]["repo"], "./")
+            self.assertIn("parent", groups[0]["commits"][0]["subject"])
+            self.assertEqual(groups[1]["repo"], "nested/")
+            self.assertIn("nested", groups[1]["commits"][0]["subject"])
+            self.assertLessEqual(len(groups[0]["commits"]), weave.MAX_COMMITS_PER_REPO)
+            self.assertLessEqual(len(groups[1]["commits"]), weave.MAX_COMMITS_PER_REPO)
 
 
 if __name__ == "__main__":

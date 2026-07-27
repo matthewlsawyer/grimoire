@@ -1,18 +1,18 @@
 #!/usr/bin/env python3
 """
-Deterministic evidence collection for `/grim-weave`.
+Deterministic evidence floor for `/grimweave`.
 
-Builds a closed evidence JSON object for one token under a target workspace.
-The agent reads only what this script returns; it does not draw the ledger or
+Builds a closed evidence JSON object for one search token under a target workspace.
+The agent reads only what this script returns; it does not draw the Weave Ledger or
 infer dependency relationships.
 
 Pipeline:
   1. Classify token -> file, symbol, or concept
   2. Collect line hits (git grep, else line scan) with caps
-  3. Derive document rows and git commit subjects
-  4. Emit sorted paths, hits, documents, commits
+  3. Derive document rows and per-repo git commit subjects
+  4. Emit sorted paths, hits, documents, commit_groups
 
-Stdout: one JSON document (`WeaveEvidence`). Does not infer relationships.
+Stdout: one JSON document (`WeaveEvidence`, `kind`: `weave_evidence`). Evidence only.
 """
 
 from __future__ import annotations
@@ -89,8 +89,10 @@ TEXT_SCAN_SUFFIXES: frozenset[str] = frozenset(
 MAX_PATHS = 40
 MAX_HITS = 120
 MAX_HITS_PER_PATH = 8
-MAX_COMMITS = 5
+MAX_COMMITS_PER_REPO = 3
 MAX_SCAN_FILES = 8000
+
+EVIDENCE_KIND = "weave_evidence"
 
 TokenKind = Literal["file", "symbol", "concept"]
 HitKind = Literal["match", "definition_candidate"]
@@ -130,18 +132,47 @@ class CommitRecord(TypedDict):
     subject: str
 
 
-class WeaveEvidence(TypedDict):
-    """Full stdout payload for grim-weave; `paths` is the closed read set."""
+class CommitGroupRecord(TypedDict):
+    """Commits for one nested or root git repository."""
 
+    repo: str
+    commits: list[CommitRecord]
+
+
+class CapsRecord(TypedDict):
+    """Active collection limits echoed on every stdout payload."""
+
+    paths: int
+    hits: int
+    hits_per_path: int
+    commits_per_repo: int
+    scan_files: int
+
+
+class WeaveEvidence(TypedDict):
+    """Deterministic evidence floor for grimweave; `paths` is the closed read set."""
+
+    kind: str
     target: str
     token: str
     token_kind: TokenKind
     git_available: bool
     commits_order: str
+    caps: CapsRecord
     paths: list[str]
     hits: list[HitRecord]
     documents: list[DocumentRecord]
-    commits: list[CommitRecord]
+    commit_groups: list[CommitGroupRecord]
+
+
+def evidence_caps() -> CapsRecord:
+    return CapsRecord(
+        paths=MAX_PATHS,
+        hits=MAX_HITS,
+        hits_per_path=MAX_HITS_PER_PATH,
+        commits_per_repo=MAX_COMMITS_PER_REPO,
+        scan_files=MAX_SCAN_FILES,
+    )
 
 
 def to_display_file(rel: str) -> str:
@@ -259,10 +290,103 @@ def resolve_file_paths(token: str, target_root: str, all_files: list[str]) -> li
     return matches[:MAX_PATHS]
 
 
-def git_available(target_root: str) -> bool:
-    """True when target is inside a git work tree."""
-    code, _ = run_git(["rev-parse", "--is-inside-work-tree"], target_root)
+def git_available(repo_root: str) -> bool:
+    """True when repo_root is inside a git work tree."""
+    code, _ = run_git(["rev-parse", "--is-inside-work-tree"], repo_root)
     return code == 0
+
+
+def _rel_repo_display(target_root: str, repo_abs: str) -> str:
+    """Format a repo absolute path as a display path ending in `/` (or `./`)."""
+    rel = os.path.relpath(repo_abs, target_root)
+    if rel in (".", ""):
+        return "./"
+    return rel.replace(os.sep, "/") + "/"
+
+
+def discover_git_roots(target_root: str) -> list[tuple[str, str]]:
+    """
+    Find nested git repository roots under target via find(1).
+
+    Returns (repo_abs, repo_display) pairs sorted shallow-first. Dedupes by
+    realpath of repo root.
+    """
+    proc = subprocess.run(
+        [
+            "find",
+            target_root,
+            "(",
+            "-name",
+            ".git",
+            "-type",
+            "d",
+            "-prune",
+            "-print",
+            ")",
+            "-o",
+            "(",
+            "-name",
+            ".git",
+            "-type",
+            "f",
+            "-print",
+            ")",
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if proc.returncode not in (0, 1):
+        return []
+
+    found: list[tuple[str, str]] = []
+    seen: set[str] = set()
+    for line in proc.stdout.splitlines():
+        git_path = line.strip()
+        if not git_path:
+            continue
+        repo_abs = os.path.dirname(git_path)
+        key = os.path.realpath(repo_abs)
+        if key in seen:
+            continue
+        seen.add(key)
+        found.append((repo_abs, _rel_repo_display(target_root, repo_abs)))
+
+    found.sort(key=lambda pair: (pair[1].count("/"), pair[1]))
+    return found
+
+
+def display_path_to_repo_rel(
+    display_path: str, repo_abs: str, target_root: str
+) -> str | None:
+    """Map a target-relative display path to a path relative to repo_abs."""
+    rel = display_path[2:] if display_path.startswith("./") else display_path
+    abs_path = os.path.normpath(os.path.join(target_root, rel))
+    repo_norm = os.path.normpath(repo_abs)
+    if abs_path == repo_norm:
+        return "."
+    if not abs_path.startswith(repo_norm + os.sep):
+        return None
+    return os.path.relpath(abs_path, repo_norm).replace(os.sep, "/")
+
+
+def partition_paths_by_repo(
+    target_root: str,
+    paths: list[str],
+    roots: list[tuple[str, str]],
+) -> dict[str, list[str]]:
+    """Group evidence display paths by deepest owning git root."""
+    by_depth = sorted(roots, key=lambda pair: len(pair[0]), reverse=True)
+    out: dict[str, list[str]] = {}
+    for display_path in paths:
+        rel = display_path[2:] if display_path.startswith("./") else display_path
+        abs_path = os.path.normpath(os.path.join(target_root, rel))
+        for repo_abs, repo_display in by_depth:
+            repo_norm = os.path.normpath(repo_abs)
+            if abs_path == repo_norm or abs_path.startswith(repo_norm + os.sep):
+                out.setdefault(repo_display, []).append(display_path)
+                break
+    return out
 
 
 def run_git(args: list[str], cwd: str) -> tuple[int, str]:
@@ -315,6 +439,45 @@ def git_grep(
         rel = to_display_file(path_part)
         hits.append((rel, line_no, text.rstrip("\n")))
     return hits
+
+
+def git_grep_under_target(
+    target_root: str,
+    pattern: str,
+    fixed: bool,
+    *,
+    case_insensitive: bool = False,
+) -> list[tuple[str, int, str]]:
+    """
+    Run `git grep` in every git root under target.
+
+    Returns hits with display paths relative to `target_root` (not repo cwd).
+    """
+    target_norm = os.path.normpath(target_root)
+    roots = discover_git_roots(target_root)
+    if not roots:
+        return git_grep(target_root, pattern, fixed, case_insensitive=case_insensitive)
+
+    merged: list[tuple[str, int, str]] = []
+    seen: set[tuple[str, int]] = set()
+    for repo_abs, _repo_display in roots:
+        repo_hits = git_grep(repo_abs, pattern, fixed, case_insensitive=case_insensitive)
+        for path, line_no, text in repo_hits:
+            rel_in_repo = path[2:] if path.startswith("./") else path
+            abs_file = os.path.normpath(os.path.join(repo_abs, rel_in_repo))
+            try:
+                rel_to_target = os.path.relpath(abs_file, target_norm)
+            except ValueError:
+                continue
+            if rel_to_target.startswith(".."):
+                continue
+            display = to_display_file(rel_to_target)
+            key = (display, line_no)
+            if key in seen:
+                continue
+            seen.add(key)
+            merged.append((display, line_no, text))
+    return merged
 
 
 def scan_file_for_needle(
@@ -397,7 +560,8 @@ def collect_hits(
     Collect bounded line hits and the path set they imply.
 
     Symbol and concept tokens use case-insensitive search. Order of work:
-    git grep (fixed needle; concepts may retry as regex), then optional file scan.
+    git grep in every nested root under target (fixed needle; concepts may retry as
+    regex), then optional file scan when grep is empty or file seeds need scan.
     Enforces MAX_HITS, MAX_HITS_PER_PATH, and MAX_PATHS.
     """
     needle = token.strip()
@@ -408,10 +572,15 @@ def collect_hits(
     if kind == "symbol" and needle:
         def_patterns = compile_definition_patterns(needle, case_insensitive=case_insensitive)
 
-    git_hits = git_grep(target_root, needle, fixed=True, case_insensitive=case_insensitive)
+    git_hits = git_grep_under_target(
+        target_root, needle, fixed=True, case_insensitive=case_insensitive
+    )
     if not git_hits and kind == "concept" and needle:
-        git_hits = git_grep(
-            target_root, re.escape(needle), fixed=False, case_insensitive=case_insensitive
+        git_hits = git_grep_under_target(
+            target_root,
+            re.escape(needle),
+            fixed=False,
+            case_insensitive=case_insensitive,
         )
 
     per_path: dict[str, int] = {}
@@ -491,26 +660,26 @@ def collect_documents(hits: list[HitRecord], seed_paths: list[str]) -> list[Docu
 COMMIT_LOG_FORMAT = "%H\t%h\t%at\t%s"
 
 
-def collect_commits(
+def collect_commits_for_repo(
+    repo_abs: str,
     target_root: str,
     token: str,
     kind: TokenKind,
-    paths: list[str],
-    *,
-    git_ok: bool,
+    display_paths: list[str],
 ) -> list[CommitRecord]:
     """
-    Merge git log results into newest-first commit rows.
+    Merge git log results for one repo into newest-first commit rows.
 
     Sources: pickaxe (-S) for symbols, --grep for concepts, and path history for
-    up to 10 evidence paths. Dedupes by full sha; caps at MAX_COMMITS.
+    up to 10 evidence paths in this repo. Dedupes by full sha; caps at
+    MAX_COMMITS_PER_REPO.
     """
-    if not git_ok:
+    if not git_available(repo_abs):
         return []
     by_full_sha: dict[str, tuple[int, str, str]] = {}
 
     def add_from_log(args: list[str]) -> None:
-        code, out = run_git(args, target_root)
+        code, out = run_git(args, repo_abs)
         if code != 0 or not out:
             return
         for line in out.splitlines():
@@ -536,7 +705,7 @@ def collect_commits(
         add_from_log(
             [
                 "log",
-                f"--max-count={MAX_COMMITS}",
+                f"--max-count={MAX_COMMITS_PER_REPO}",
                 f"-S{name}",
                 *log_tail,
             ]
@@ -545,18 +714,20 @@ def collect_commits(
         add_from_log(
             [
                 "log",
-                f"--max-count={MAX_COMMITS}",
+                f"--max-count={MAX_COMMITS_PER_REPO}",
                 f"--grep={name}",
                 "-i",
                 *log_tail,
             ]
         )
-    for p in paths[:10]:
-        rel = p[2:] if p.startswith("./") else p
+    for p in display_paths[:10]:
+        rel = display_path_to_repo_rel(p, repo_abs, target_root)
+        if rel is None:
+            continue
         add_from_log(
             [
                 "log",
-                f"--max-count={MAX_COMMITS}",
+                f"--max-count={MAX_COMMITS_PER_REPO}",
                 *log_tail,
                 "--",
                 rel,
@@ -566,8 +737,39 @@ def collect_commits(
     ranked = sorted(by_full_sha.values(), key=lambda row: row[0], reverse=True)
     return [
         CommitRecord(sha=short, subject=subject)
-        for _at, short, subject in ranked[:MAX_COMMITS]
+        for _at, short, subject in ranked[:MAX_COMMITS_PER_REPO]
     ]
+
+
+def collect_commit_groups(
+    target_root: str,
+    token: str,
+    kind: TokenKind,
+    paths: list[str],
+) -> list[CommitGroupRecord]:
+    """
+    Collect commit provenance per git root that owns evidence paths.
+
+    Only repos with at least one partitioned path are queried. Groups omit empty
+    commit lists and follow shallow-first repo order.
+    """
+    if not paths:
+        return []
+    roots = discover_git_roots(target_root)
+    if not roots:
+        return []
+    partitioned = partition_paths_by_repo(target_root, paths, roots)
+    groups: list[CommitGroupRecord] = []
+    for repo_abs, repo_display in roots:
+        paths_in = partitioned.get(repo_display)
+        if not paths_in:
+            continue
+        commits = collect_commits_for_repo(
+            repo_abs, target_root, token, kind, paths_in
+        )
+        if commits:
+            groups.append(CommitGroupRecord(repo=repo_display, commits=commits))
+    return groups
 
 
 def weave(target_root: str, token: str) -> WeaveEvidence:
@@ -584,24 +786,26 @@ def weave(target_root: str, token: str) -> WeaveEvidence:
 
     documents = collect_documents(hits, seed_paths)
     git_ok = git_available(target_root)
-    commits = collect_commits(target_root, token, kind, paths, git_ok=git_ok)
+    commit_groups = collect_commit_groups(target_root, token, kind, paths)
 
     return WeaveEvidence(
+        kind=EVIDENCE_KIND,
         target=target_root,
         token=token.strip(),
         token_kind=kind,
         git_available=git_ok,
         commits_order="newest_first",
+        caps=evidence_caps(),
         paths=paths,
         hits=hits,
         documents=documents,
-        commits=commits,
+        commit_groups=commit_groups,
     )
 
 
 def main() -> int:
     """CLI entry: --target and --token required; prints JSON WeaveEvidence to stdout."""
-    ap = argparse.ArgumentParser(description="Collect weave evidence for grim-weave (JSON stdout)")
+    ap = argparse.ArgumentParser(description="Collect weave evidence for grimweave (JSON stdout)")
     ap.add_argument(
         "--target",
         required=True,

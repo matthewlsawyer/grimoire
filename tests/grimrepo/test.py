@@ -8,7 +8,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from load_script import load_script
 
-census = load_script("grim-repo/scripts/census.py", "grim_repo_census")
+census = load_script("grimrepo/scripts/census.py", "grimrepo_census")
 
 
 class CensusHelperTests(unittest.TestCase):

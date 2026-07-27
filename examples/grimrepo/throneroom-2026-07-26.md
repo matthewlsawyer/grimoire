@@ -1,20 +1,21 @@
 | Field | Value |
 | --- | --- |
-| Target | [throneroom](https://github.com/matthewlsawyer/throneroom) |
+| Target | throneroom (local workspace) |
 | Model | Composer 2.5 |
 | Ran with | Cursor |
-| Prompt | `/grim-repo` |
-| Runtime | ~2s |
-| Date | 2026-07-25 |
+| Prompt | `/grimrepo` |
+| Runtime | 4s (nested root discovery + git status per repo) |
+| Date | 2026-07-26 |
 
-# Grim Repo: Throneroom
+# Grim Repo: throneroom
 
 ```text
 throneroom/
 ╞══════════════════◆
+│
 ├─ ./
 │  ├─▲ ↑1 ↓0
-│  ├─▲ +0 -0
+│  ├─▲ +2 -2
 │  └─● main
 │
 ├─ projects/dotfiles/
@@ -23,13 +24,13 @@ throneroom/
 │  └─● main
 │
 ├─ projects/grimoire/
-│  ├─▲ ↑0 ↓0
-│  ├─▲ +71 -21
-│  └─● main
+│  ├─▲ no-up
+│  ├─▲ +44 -42
+│  └─● agent-only
 │
 ├─ projects/site/
 │  ├─▲ ↑0 ↓0
-│  ├─▲ +83 -3
+│  ├─▲ +7 -7
 │  └─● main
 │
 └─ scratch/superfile-2026-07-23/
