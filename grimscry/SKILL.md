@@ -22,14 +22,33 @@ Given a repository or workspace, distill meaning and emit one at-a-glance **Scry
 ## Workflow
 
 1. Resolve `target` to an absolute workspace root (cwd, named path, or clone).
-2. **Discovery** - build a closed **Seed set** (session-only; see Discovery below).
+2. **Discovery** - run Script; latest stdout lines are the closed **Seed set** (see Script, Script policy, and Discovery below).
 3. Read **only** Seed set paths. Skip unreadable seeds; omit rather than invent.
 4. Distill for salience in-session (density included). Concepts and commands: omit if unnamed by this crawl.
 5. Emit Output. Do not write the lantern to disk.
 
+## Script
+
+From the skill root directory, run:
+
+```bash
+python3 <skill-root>/scripts/discover.py --target <absolute_workspace_root> --budget <budget>
+```
+
+- Always pass an absolute workspace to `--target`. Never use `--target .`
+- Stdout: flat seed paths, one `./rel` path per line. No section headers.
+
+### Script policy
+
+- Script stdout is the seed observation floor; the Scry Lantern is agent-composed from reads. Scripts supply bounded evidence, not conclusions.
+- **Prefer** `scripts/discover.py` for the seed list (do not skip the script and freestyle discovery).
+- **Re-run** with reasoned `--budget` (or other supported flags) when stdout is empty, at budget, or mismatched to the ask. Briefly note what changed vs the prior run.
+- **Read-only** - do not edit script files in-session; read the script only to understand behavior.
+- **Supplement** only after at least one script run (re-run when params might help). Keep supplements bounded; merge into an explicit Seed set before reads. Note in chat when any seed path came from outside script stdout (one line is enough).
+
 ## Discovery
 
-Build the Seed set in-session (grep, glob, read).
+The script implements this contract:
 
 **Prune** - skip any path with a segment in this closed set:
 
@@ -41,7 +60,7 @@ Build the Seed set in-session (grep, glob, read).
 
 **Ranking** - dedupe by realpath; sort shallow-first `(depth, path)`; cap at `budget`.
 
-**Closed read boundary** - after the Seed set is fixed, no further repo discovery. No expansion beyond those paths.
+**Closed read boundary** - after the Seed set is fixed, no ad-hoc seed expansion except supplement per Script policy. Reads stay within the closed Seed set.
 
 Discovery does not honor `.gitignore` unless the user asks otherwise.
 
