@@ -28,9 +28,9 @@ Follow a single token through a workspace: bounded evidence, then an at-a-glance
 ## Workflow
 
 1. Resolve `target` and **user token**. Ask if either is unclear.
-2. **Disambiguate** to `search_token` when the user token is unlikely to work as-is for search; otherwise `search_token` = user token. In-session discovery allowed **only** for this choice. Ask if multiple anchors are equally valid; do not collect evidence until one `search_token` is chosen.
-3. **Evidence** - build a closed evidence packet in-session (see Evidence below).
-4. Read **only** paths in `paths` plus any file needed to interpret a `hits` line already in evidence. No further repo discovery.
+2. **Disambiguate** to `search_token` when the user token is unlikely to work as-is for search; otherwise `search_token` = user token. In-session discovery allowed **only** for this choice. Ask if multiple anchors are equally valid; do not run Script until one `search_token` is chosen.
+3. **Evidence** - run Script with `search_token`; parse stdout JSON as the default closed evidence set (see Script, Script policy, and Evidence below).
+4. Read **only** paths in the closed evidence set plus any file needed to interpret a `hits` line already in evidence. No further repo discovery except supplement per Script policy.
 5. From evidence and those reads, reason about definition sites, depends-on, referenced-by, evolution, docs, and follow-on threads. Omit what evidence cannot support.
 6. **Emit Output** - in order: Weave Ledger, then `# Summary` only (see Output). Closing Summary must not introduce paths or symbols outside the ledger and read set.
 
@@ -39,43 +39,54 @@ Follow a single token through a workspace: bounded evidence, then an at-a-glance
 - Skip when the user token is already a path, symbol, or literal grep needle.
 - Ledger title uses the **user token** (`# Grim Weave: <user token>`).
 - When user token ≠ `search_token`, note both in the closing `# Summary` when needed.
+- JSON field `token` is always the **search token** passed to Script.
+
+## Script
+
+From the skill root directory, run:
+
+```bash
+python3 <skill-root>/scripts/weave.py --target <absolute_workspace_root> --token <search_token>
+```
+
+- Always pass an absolute workspace to `--target`. Never use `--target .`
+- Stdout: one JSON object (`kind`: `weave_evidence`). Evidence only - not the Weave Ledger.
+- Script collects occurrences and history; agent owns relationships, threads, and the viewport.
+
+### Script policy
+
+- Script stdout is the evidence floor (`weave_evidence`); relationships, threads, and the Weave Ledger are agent synthesis from evidence and reads.
+- **Prefer** `scripts/weave.py` for the evidence floor (do not skip the script and freestyle the whole collection phase).
+- **Re-run** with reasoned `--token` / `search_token` or after disambiguation when output is empty, at `caps`, or mismatched to the ask. Briefly note what changed vs the prior run.
+- **Read-only** - do not edit script files in-session; read the script only to understand behavior.
+- **Supplement** only after at least one script run (re-run when params might help). Default closed set = latest weave stdout; supplemental grep only per policy, within the spirit of `caps`. Merge supplements into an explicit closed set before reads. Note in chat when evidence came from outside script stdout (one line is enough).
 
 ## Evidence
 
-Collect in-session (prefer `git grep`; else bounded ripgrep or line scan).
+The script implements collection within `caps` (see JSON). Default closed set = latest script stdout unless supplemented per Script policy.
 
 **Prune** - skip any path with a segment in this closed set:
 
 `.git`, `node_modules`, `vendor`, `.venv`, `venv`, `__pycache__`, `.pnpm-store`, `.yarn`, `dist`, `build`, `_site`, `.next`, `.nuxt`, `target`, `coverage`, `.turbo`
 
-**Caps** (hard stop when reached):
-
-| Cap | Value |
-| --- | --- |
-| `paths` | 40 |
-| `hits` (total) | 120 |
-| `hits` per path | 8 |
-| `commits` | 5 |
-| files scanned (fallback line scan) | 8000 |
-
-**Search**
-
-- `file`: path relative to target; hits on that path.
-- `symbol`: `git grep -F` / ripgrep; case-insensitive; flag `definition_candidate` when line matches declaration-shaped patterns for the language.
-- `concept`: phrase search; case-insensitive; prefer docs (`*.md`, `*.mdx`, `docs/`, `adr/`).
-
-**Commits** (when git available): pickaxe / `git log` on touched paths; merge newest-first; max 5. When git unavailable, `commits` empty.
-
-**Evidence packet** (session-only, before ledger):
+**Stdout fields** (deterministic evidence floor):
 
 | Field | Shape |
 | --- | --- |
+| `kind` | `weave_evidence` |
+| `token` | Search needle used for collection |
 | `token_kind` | `file` \| `symbol` \| `concept` |
-| `paths` | Closed read set (repo-relative) |
-| `hits` | Path, line, kind (`match` \| `definition_candidate`) |
+| `paths` | Closed read set (`./rel` paths) |
+| `hits` | Path, line, text, kind (`match` \| `definition_candidate`) |
 | `documents` | Doc-path subset of hits |
-| `commits` | Short sha + subject; newest first |
+| `commit_groups` | Per git root: `repo` display path + `commits` (sha, subject); newest first within each group |
+| `commits_order` | `newest_first` when any group has commits |
 | `git_available` | boolean |
+| `caps` | `paths`, `hits`, `hits_per_path`, `commits_per_repo`, `scan_files` limits |
+
+Stdout includes `caps`, `paths`, `hits`, `documents`, and `commit_groups`. Relationships and threads are agent-composed after reads.
+
+**Not in JSON (agent synthesis):** Relationships, Threads, ledger annotations beyond evidence-backed role line, `# Summary`, follow-up `/grimweave` suggestions.
 
 ## Output
 
@@ -106,12 +117,13 @@ Sections (use `≣` trunks; omit empty sections):
 | --- | --- |
 | Definition | Defining paths / symbols from `definition_candidate` hits and file reads |
 | Relationships | `Depends On` and `Referenced By` - named symbols inferred from read files |
-| Provenance | `Commits` (`●` + short sha + subject, **newest first**); `Documents` from `documents` |
+| Provenance | `Commits` from `commit_groups` (nest by `repo` then `●` rows, newest first within each repo); `Documents` from `documents` |
 | Threads | `▶` follow-on symbols worth a nested `/grimweave` (high-signal only). Closing Summary selects from these for the loop suggestion. |
 
 Provenance layout:
 
-- Omit `Commits` when evidence has no commits.
+- Omit `Commits` when `commit_groups` is empty.
+- Under `Commits`, nest one branch per `repo` in `commit_groups` (shallow-first), then `●` rows for that group's `commits`.
 - Omit `Documents` when `documents` is empty.
 
 Style:
@@ -147,9 +159,11 @@ TodoService
 │
 ├─≣ Provenance
 │  ├─ Commits
-│  │  ├─● 0034ac refactor(todo): extract EventBus
-│  │  ├─● 0017b2 feat(product): business logic
-│  │  └─● 001e13 feat(todo): introduce TodoService
+│  │  ├─ ./
+│  │  │  └─● 0034ac refactor(todo): extract EventBus
+│  │  └─ packages/nested/
+│  │     ├─● 0017b2 feat(product): business logic
+│  │     └─● 001e13 feat(todo): introduce TodoService
 │  │
 │  └─ Documents
 │     ├─ adr/todo-app-arch.md
@@ -172,4 +186,4 @@ TodoService
 ## Boundaries
 
 - Session-only viewport; no disk artifacts.
-- No collection or reads beyond Evidence caps and closed `paths`.
+- No collection or reads beyond closed evidence set, evidence `caps`, and Script policy supplements.
