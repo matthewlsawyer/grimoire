@@ -1,8 +1,8 @@
 ---
-name: grimrepo
+name: grim-repo
 description: >-
   Given a workspace or directory, reveal nested git repositories and their
-  current status. Use when the user invokes grimrepo or needs a nested-repo
+  current status. Use when the user invokes grim-repo or needs a nested-repo
   census board.
 ---
 
@@ -94,8 +94,8 @@ Glyphs:
 ## Usage
 
 ```text
-/grimrepo
-/grimrepo /path/to/workspace
+/grim-repo
+/grim-repo /path/to/workspace
 ```
 
 ## Boundaries

@@ -8,7 +8,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from load_script import load_script
 
-discover = load_script("grimscry/scripts/discover.py", "grimscry_discover")
+discover = load_script("grim-scry/scripts/discover.py", "grim_scry_discover")
 
 
 class DiscoverTests(unittest.TestCase):
