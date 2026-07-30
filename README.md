@@ -37,7 +37,7 @@ Reason with the results.
 
 Grim Scry gives insight into the conceptual _shape of a project_.
 
-`/grim-scry` distills a target into one concept lantern - ideas hang first, named commands underneath.
+`/grim-scry` distills a target into one conceptual tree; ideas hang first, context underneath.
 
 [grim-scry/SKILL.md](grim-scry/SKILL.md)
 
@@ -106,7 +106,7 @@ workspace/
 
 Grim Forge maintains a project's _provenance over time_.
 
-`/grim-forge` bootstraps or updates `CHANGELOG.md` and `HISTORY.md` per git root from bounded history since the last marker.
+`/grim-forge` bootstraps or updates `CHANGELOG.md` and `HISTORY.md` per git root from bounded history since the last marker, then shows a summary viewport of the delta.
 
 [grim-forge/SKILL.md](grim-forge/SKILL.md)
 
