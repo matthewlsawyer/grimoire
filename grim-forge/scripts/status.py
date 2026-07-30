@@ -31,6 +31,7 @@ PRUNE_DIR_NAMES = frozenset(
         ".turbo",
     }
 )
+COMMIT_LIMIT = 250
 CHANGELOG_NAME = "CHANGELOG.md"
 HISTORY_NAME = "HISTORY.md"
 MARKER_PATTERN = re.compile(r"<!--\s*marker:\s*([0-9a-fA-F]+)\s*-->")
@@ -117,11 +118,21 @@ def repo_commits(root: Path, marker: str | None) -> list[dict[str, str]]:
                 root,
                 "log",
                 f"{marker}..HEAD",
+                f"-n{COMMIT_LIMIT}",
                 f"--format={COMMIT_FORMAT}",
             )
         )
-    return parse_commits(
-        git_lines(root, "log", "--reverse", f"--format={COMMIT_FORMAT}")
+    return list(
+        reversed(
+            parse_commits(
+                git_lines(
+                    root,
+                    "log",
+                    f"-n{COMMIT_LIMIT}",
+                    f"--format={COMMIT_FORMAT}",
+                )
+            )
+        )
     )
 
 
@@ -146,9 +157,15 @@ def should_prune_touched(root: Path, rel: str) -> bool:
 
 def repo_touched_paths(root: Path, marker: str | None) -> list[str]:
     if marker:
-        args = ["log", f"{marker}..HEAD", "--name-only", "--pretty=format:"]
+        args = [
+            "log",
+            f"{marker}..HEAD",
+            f"-n{COMMIT_LIMIT}",
+            "--name-only",
+            "--pretty=format:",
+        ]
     else:
-        args = ["log", "--name-only", "--pretty=format:"]
+        args = ["log", f"-n{COMMIT_LIMIT}", "--name-only", "--pretty=format:"]
     seen: set[str] = set()
     paths: list[str] = []
     for line in git_lines(root, *args):

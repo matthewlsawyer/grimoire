@@ -46,7 +46,7 @@ git -C <target> rev-parse --show-toplevel
 - Do not read, cite, or write provenance for files outside `repo_root`.
 - Nested repos under the outer tree are out of scope unless `repo_root` is that nested repo.
 
-**Outer artifacts: policy only.** Record boundary decisions about Projects when evidenced in outer commits, rules, or XP - for example cortex-not-landlord or local ownership. Do not name, inventory, or narrate inner repos. Do not record inner-project decisions, refactors, or commits. If the only fact is "nested repos exist under `projects/`", omit it unless an outer decision changed the layout.
+**Outer artifacts: policy only.** Do not name, inventory, or narrate inner repos. Do not record inner-project decisions, refactors, or commits. If the only fact is "nested repos exist under `projects/`", omit it unless an outer decision changed the layout.
 
 ## Artifacts
 
@@ -160,7 +160,7 @@ Rules:
 | **Delta** | Append 0-1 entry per run under `### YYYY-MM-DD` where the date is the **newest commit** in the forged range (`commits[-1].date` from status). |
 | **Entry content** | Brief narrative glue + link to CHANGELOG for what + ADR link when git named one. Do not restate bullets or ADR bodies. |
 | **Dedupe** | Skip a timeline entry when the changelog bullet alone is sufficient and no narrative adds temporal context. |
-| **Outer repo policy** | Projects only as Throneroom policy; no inner repo names or commits. |
+| **Outer repo policy** | No inner repo names or commits. |
 
 ## ADRs: reference via git, don't hunt
 
@@ -181,10 +181,10 @@ Forge does not hunt for missing ADRs or suggest new ones. When a commit touches 
 4. **Read** - read from `status.touched` per read policy below; include `working_tree` paths only when they support a bullet.
 5. **Genesis**
    - Create/update `CHANGELOG.md` with KaC header, curated `## [Unreleased]` (commits after newest tag), and versioned release sections from `releases`.
-   - Create `HISTORY.md` with `## Story` and optional `## Timeline` era anchors (0-3); link changelog and ADRs git named.
+   - Create `HISTORY.md` with `## Story` and optional `## Timeline` era anchors (curated; not one line per commit); link changelog and ADRs git named.
    - Set marker to `HEAD` in HISTORY.
 6. **Delta**
-   - Append 0-3 notable bullets under correct `###` type(s) in `## [Unreleased]`; dedupe.
+   - Append notable bullets under correct `###` type(s) in `## [Unreleased]`; dedupe.
    - Optionally append 0-1 dated `### YYYY-MM-DD` entry under `## Timeline` when narrative is warranted (`commits[-1].date`).
    - Advance marker in HISTORY.
 7. **Write** - only `CHANGELOG.md` and `HISTORY.md` at `repo_root`.
@@ -212,8 +212,8 @@ python3 <skill-root>/scripts/status.py --target <absolute_repo_root>
 ### Script policy
 
 - Always pass `repo_root` as `--target`. Never pass a workspace path that is wider than `repo_root`.
-- `status.py` auto-selects range from the HISTORY marker: no marker -> genesis (full reverse log); marker present -> delta (`marker..HEAD`).
-- Returns artifact paths, `phase`, marker, `commits` (each with `commit`, `date`, `subject`), `touched` (paths from that range, newest-first), `releases` (git tags), and `working_tree`. Do not run raw git commands during a Forge run.
+- `status.py` auto-selects range from the HISTORY marker: no marker -> genesis; marker present -> delta (`marker..HEAD`). Commits and `touched` paths use the same latest-`250` commit window.
+- Returns artifact paths, `phase`, marker, `commits` (latest 250; each with `commit`, `date`, `subject`), `touched` (paths from that window, newest-first), `releases` (git tags), and `working_tree`. Do not run raw git commands during a Forge run.
 - `status.py` is read-only. Do not edit it while using Forge.
 - File reads are skill-owned per read policy above.
 
