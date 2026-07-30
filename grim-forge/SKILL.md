@@ -22,7 +22,7 @@ The first run bootstraps both. Later runs append curated Unreleased bullets and 
 | --- | --- | --- |
 | `target` | no | Repository or directory named by the prompt. Empty means the current workspace root. |
 | `intention` | no | The session ask. |
-| `budget` | no | Max files in one focused read set; default `25`. |
+| `budget` | no | Max files to read per run; default `50`. |
 
 Resolve `target` from the prompt before collection:
 
@@ -57,15 +57,17 @@ Default paths at `repo_root`:
 | Changelog | `./CHANGELOG.md` | Factual ledger; Unreleased-only writes |
 | History | `./HISTORY.md` | Temporal ledger; dated timeline |
 
-**Versioning:** Forge writes only under `## [Unreleased]`. Humans cut versioned release sections.
+**Versioning:** Delta appends only under `## [Unreleased]`. Genesis cuts `## [version] - YYYY-MM-DD` release sections from git tags in `status.releases` (newest first, below Unreleased).
 
-**Marker:** lives in `CHANGELOG.md` only.
+**Releases:** `status` returns semver-shaped git tags (`tag`, `version`, `commit`, `date`), sorted newest first. Use them to bound Unreleased and to seed versioned changelog sections on genesis.
+
+**Marker:** lives in `HISTORY.md` only.
 
 ```markdown
 <!-- marker: abc1234 -->
 ```
 
-**Detect phase:** `CHANGELOG.md` absent or missing valid marker -> genesis; otherwise delta.
+**Detect phase:** `HISTORY.md` absent or missing valid marker -> genesis; otherwise delta.
 
 **References:** HISTORY may link to CHANGELOG bullets and ADR files when git named them. CHANGELOG never links to HISTORY.
 
@@ -82,8 +84,6 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
-
-<!-- marker: def5678 -->
 
 ## [Unreleased]
 
@@ -112,17 +112,21 @@ Rules:
 - **Omit empty type sections** - per KaC guidance, do not keep blank `### Added` blocks.
 - **Map evidence** - use conventional commit type when clear (`feat` -> Added, `fix` -> Fixed, `refactor!` -> Changed, etc.); default to Changed when unsure.
 - **Bullet content** - human-readable what changed; optional commit shorthand in parentheses at end.
-- **Existing CHANGELOG** - extend in place; match existing format when present; add `marker` on first Forge run without rewriting human entries.
+- **Existing CHANGELOG** - extend in place; match existing format when present; do not add forge metadata.
 - **No HISTORY links** - changelog never mentions `HISTORY.md`.
+- **Releases on genesis** - when `releases` is non-empty, `## [Unreleased]` holds commits after the newest tag only; cut `## [version] - date` sections from `releases` (strip leading `v` from tag). Curate bullets from commits between each tag and the next newer tag; omit empty sections. When tag count is large, keep recent releases in full and summarize older major lines rather than one heading per patch.
+- **Releases on delta** - do not rewrite versioned sections; append to `## [Unreleased]` only.
 
 ## HISTORY contract (temporal ledger)
 
-HISTORY records when changes landed and what they mean in sequence. No `## Recent`. No marker.
+HISTORY records when changes landed and what they mean in sequence. No `## Recent`.
 
 ```markdown
 # History
 
 <What this project is and why this sidecar exists.>
+
+<!-- marker: def5678 -->
 
 ## Story
 
@@ -172,78 +176,135 @@ Forge does not hunt for missing ADRs or suggest new ones. When a commit touches 
 ## Workflow
 
 1. **Interpret** - resolve target, `repo_root`, intention.
-2. **Detect** - no `CHANGELOG.md` or no marker -> genesis; else delta.
-3. **Status** - run `status` with `repo_root` as `--target`.
-4. **Genesis**
-   - Run `status --bootstrap`.
-   - Create/update `CHANGELOG.md` with KaC header and curated `## [Unreleased]` entries from `commits`.
+2. **Detect** - no `HISTORY.md` or no marker -> genesis; else delta.
+3. **Status** - run `status.py` with `repo_root` as `--target` (auto-selects genesis or delta range from marker).
+4. **Read** - read from `status.touched` per read policy below; include `working_tree` paths only when they support a bullet.
+5. **Genesis**
+   - Create/update `CHANGELOG.md` with KaC header, curated `## [Unreleased]` (commits after newest tag), and versioned release sections from `releases`.
    - Create `HISTORY.md` with `## Story` and optional `## Timeline` era anchors (0-3); link changelog and ADRs git named.
-   - Set marker to `HEAD` in CHANGELOG.
-5. **Delta**
-   - Run `status` (commits since marker in JSON, each with `date`).
-   - Pick 1-3 `focus` candidates from commit paths or root; read each `read_set`.
+   - Set marker to `HEAD` in HISTORY.
+6. **Delta**
    - Append 0-3 notable bullets under correct `###` type(s) in `## [Unreleased]`; dedupe.
    - Optionally append 0-1 dated `### YYYY-MM-DD` entry under `## Timeline` when narrative is warranted (`commits[-1].date`).
-   - Advance marker in CHANGELOG.
-6. **Write** - only `CHANGELOG.md` and `HISTORY.md` at `repo_root`.
-7. **Emit** - report both artifacts.
+   - Advance marker in HISTORY.
+7. **Write** - only `CHANGELOG.md` and `HISTORY.md` at `repo_root`.
+8. **Emit** - compose the ledger viewport from artifacts just written; emit title, fenced viewport, and slim Provenance footer. Do not return a parallel suggestion list.
+
+## Read policy
+
+| Rule | Detail |
+| --- | --- |
+| **Source** | `status.touched` first; `working_tree` only when it supports a bullet |
+| **Grouping** | 1-3 narrative dirs from touched parent paths |
+| **Context** | Ancestor README/manifests on path to root for each touched file |
+| **Budget** | Cap reads at `budget` (default 50) |
+| **Fallback** | If `touched` empty: `./README.md` + root manifest only |
+| **No `.`** | No full-repo tree walks |
 
 ## Script
 
 From the skill root directory, run:
 
 ```bash
-python3 <skill-root>/scripts/forge.py \
-  status \
-  --target <absolute_repo_root>
-
-python3 <skill-root>/scripts/forge.py \
-  status \
-  --target <absolute_repo_root> \
-  --bootstrap
-
-python3 <skill-root>/scripts/forge.py \
-  focus \
-  --target <absolute_repo_root> \
-  --candidate <relative_candidate_path> \
-  --budget <budget>
+python3 <skill-root>/scripts/status.py --target <absolute_repo_root>
 ```
 
 ### Script policy
 
 - Always pass `repo_root` as `--target`. Never pass a workspace path that is wider than `repo_root`.
-- `status` returns artifact paths, marker, bounded `commits` (each with `commit`, `date`, `subject`), and `working_tree`. Do not run raw git commands during a Forge run.
-- Genesis -> `status --bootstrap` (reverse log, cap 50). Delta -> `status` (commits since marker, cap 50).
-- `focus` emits a bounded contextual read set: candidate files, README, and manifests on the path to root.
-- Re-run focus with a reasoned `--budget` when the read set is full or misses context. Briefly state what changed.
-- `forge.py` is read-only. Do not edit it while using Forge.
-- Include material `working_tree` paths only when focused evidence supports them.
+- `status.py` auto-selects range from the HISTORY marker: no marker -> genesis (full reverse log); marker present -> delta (`marker..HEAD`).
+- Returns artifact paths, `phase`, marker, `commits` (each with `commit`, `date`, `subject`), `touched` (paths from that range, newest-first), `releases` (git tags), and `working_tree`. Do not run raw git commands during a Forge run.
+- `status.py` is read-only. Do not edit it while using Forge.
+- File reads are skill-owned per read policy above.
 
 ## Output
 
-```markdown
+| Part | Required | Holds |
+| --- | --- | --- |
+| Title | yes | `# Grim Forge: <target>` outside the fence |
+| Ledger | yes | `text` fence: agent-composed glyph viewport |
+| Provenance | yes | slim footer: phase, marker, written |
+
+### Rendered output
+
+````markdown
 # Grim Forge: <target>
+
+```text
+<ledger-viewport>
+```
 
 ## Provenance
 
-- **Repo:** `./`
 - **Phase:** delta
-- **Changelog:** `./CHANGELOG.md`
-- **History:** `./HISTORY.md`
 - **Marker:** abc1234 -> def5678
 - **Written:** 2 Unreleased entries; 1 Timeline entry
-- **Status:** `status --bootstrap` | `status`
+````
+
+- `CHANGELOG.md` and `HISTORY.md` are the deliverables on disk. The ledger viewport is session-only.
+- Do not return a parallel suggestion list.
+
+### Ledger viewport
+
+Compose after writes complete. Read what was written; do not redraw from memory.
+
+Glyphs:
+
+- `│` `├` `└` `─` hierarchy
+- `╞` `═` divider
+- `◆` terminator
+- Leaves are plain text
+
+| Rule | Detail |
+| --- | --- |
+| **Workspace trunk** | Basename of `repo_root` with trailing `/`; owns the sole `╞═◆` divider and spacer line `│` |
+| **CHANGELOG branch** | Under trunk: `CHANGELOG.md` -> `## [Unreleased]` -> versioned `## [version]` sections on genesis when `releases` present -> only non-empty `###` types -> bullet leaves (truncate long bullets) |
+| **Branch spacer** | Bare `│` line between CHANGELOG and HISTORY siblings |
+| **HISTORY branch** | Under trunk: `HISTORY.md` -> `marker: <before> -> <after>` (genesis uses `none -> <after>`) -> `## Story` (genesis only; omit on delta when unchanged) -> `## Timeline` -> latest `### YYYY-MM-DD` entries (cap 3, newest first) |
+| **This run** | Show leaves written this run; omit empty KaC sections; do not dump full file bodies |
+
+Rules above are authoritative; below is drawing guide only.
+
+```text
+repository/
+╞══════════════════◆
+│
+├─ CHANGELOG.md
+│  └─ ## [Unreleased]
+│     ├─ ### Added
+│     └─ ### Changed
+│
+└─ HISTORY.md
+   ├─ marker: none -> def5678
+   ├─ ## Story
+   └─ ## Timeline
+      └─ ### 2026-07-29
 ```
 
-- The changelog and history are the deliverables. Do not return a parallel suggestion list.
-- State repo (display path under the workspace), phase, both artifact paths, marker before and after, and what was written.
-- State which `status` mode was used.
+```text
+foo-api/
+╞══════════════════◆
+│
+├─ CHANGELOG.md
+│  ├─ ## [Unreleased]
+│  │  ├─ ### Added
+│  │  │  └─ `{ FooExport }` named export on the foo-api package (6d2c04d1)
+│  │  └─ ### Fixed
+│  │     └─ Bar worker adopts idempotency keys (b71d4f0)
+│  └─ ## [3.1.6]
+│
+└─ HISTORY.md
+   ├─ marker: 9fd02ae -> b71d4f0
+   └─ ## Timeline
+      └─ ### 2026-08-04
+         └─ Idempotency guard closes duplicate-charge gap
+```
 
 ## Boundaries
 
 - One changelog and one history per git repository. Never append nested-repo deltas to outer artifacts.
-- Outer Story may cite Projects only as policy. Never cite inner repo paths, commits, or implementation detail.
+- Never cite inner repo paths, commits, or implementation detail.
 - Forge writes only `CHANGELOG.md` and `HISTORY.md` at `repo_root`.
 - Write 0-3 Unreleased bullets per delta run. Skip noise and dedupe against existing Unreleased.
 - Preserve Story after genesis. Amend it only to correct a factual error with evidence.
-- No facts, commands, APIs, history, or rationale beyond focused evidence.
+- No facts, commands, APIs, history, or rationale beyond touched evidence and read policy.
