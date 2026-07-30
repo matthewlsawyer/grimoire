@@ -41,7 +41,7 @@ Grim Scry gives insight into the conceptual _shape of a project_.
 
 [grim-scry/SKILL.md](grim-scry/SKILL.md)
 
-Example template:
+Example viewport:
 
 ```text
 workspace/
@@ -80,7 +80,7 @@ Grim Repo gives insight into a _project in motion_.
 
 [grim-repo/SKILL.md](grim-repo/SKILL.md)
 
-Example template:
+Example viewport:
 
 ```text
 workspace/
@@ -104,17 +104,29 @@ workspace/
 
 ## grim-forge
 
-Grim Forge maintains a project's provenance - `CHANGELOG.md` (Keep a Changelog factual ledger: what changed) and `HISTORY.md` (temporal ledger: when it landed) per git repository root.
+Grim Forge maintains a project's _provenance over time_.
 
-`/grim-forge` resolves `repo_root` with `git rev-parse --show-toplevel`, then traces bounded history within that repo only. On its first run it bootstraps both artifacts; later runs append curated Unreleased bullets and dated Timeline entries since the recorded marker. Name a nested path (for example, `projects/grimoire`) to forge that repo's artifacts separately.
+`/grim-forge` bootstraps or updates `CHANGELOG.md` and `HISTORY.md` per git root from bounded history since the last marker.
 
 [grim-forge/SKILL.md](grim-forge/SKILL.md)
 
-Forge writes only under `## [Unreleased]` until a human cuts a release. The marker lives in `CHANGELOG.md`. HISTORY `## Timeline` is reverse chronological, keyed to commit dates from git. Timeline may link to changelog bullets and ADRs when git named them; changelog never links to history.
+Example viewport:
 
-HISTORY Story is a palimpsest: genesis writes the durable narrative once; delta runs add 0-1 dated Timeline entry per run when warranted. An outer workshop history records Throneroom policy only - boundary decisions evidenced in outer commits, rules, or XP. It does not name inner repos or narrate their commits.
-
-Forge writes only `CHANGELOG.md` and `HISTORY.md`. It does not edit source, README, ADR, or other project documentation.
+```text
+workspace/
+╞══════════════════◆
+│
+├─ CHANGELOG.md
+│  └─ ## [Unreleased]
+│     ├─ ### Added
+│     └─ ### Changed
+│
+└─ HISTORY.md
+   ├─ marker: none -> abc1234
+   ├─ ## Story
+   └─ ## Timeline
+      └─ ### 2026-07-29
+```
 
 ## Scripts
 
@@ -124,28 +136,25 @@ Ship inside each skill directory (`<skill-root>/scripts/`).
 | --- | --- |
 | `/grim-scry` | [discover.py](grim-scry/scripts/discover.py) |
 | `/grim-repo` | [census.py](grim-repo/scripts/census.py) |
-| `/grim-forge` | [forge.py](grim-forge/scripts/forge.py) |
+| `/grim-forge` | [status.py](grim-forge/scripts/status.py) |
 
 Stdout:
 
 - `/grim-scry` - seed paths, one `./rel` per line
 - `/grim-repo` - full census board (fence as-is)
-- `/grim-forge` - status or focused JSON evidence manifest
+- `/grim-forge` - status JSON evidence manifest
 
 Example invocations (absolute paths only):
 
 ```bash
+# scry
 python3 grim-scry/scripts/discover.py --target /abs/workspace --budget 50
+
+# repo
 python3 grim-repo/scripts/census.py --target /abs/workspace
-python3 grim-forge/scripts/forge.py status \
-  --target /abs/workspace
-python3 grim-forge/scripts/forge.py status \
-  --target /abs/workspace \
-  --bootstrap
-python3 grim-forge/scripts/forge.py focus \
-  --target /abs/workspace \
-  --candidate ./packages/api \
-  --budget 25
+
+# forge
+python3 grim-forge/scripts/status.py --target /abs/workspace
 ```
 
 ## Glyph Dictionary
@@ -167,9 +176,9 @@ Sample runs: [examples/](examples/).
 
 | Spell | Run |
 | --- | --- |
-| `/grim-scry` | [_template](examples/_template.md) |
-| `/grim-repo` | [_template](examples/_template.md) |
-| `/grim-forge` | [genesis and delta](examples/grim-forge/genesis-and-delta.md) |
+| `/grim-scry` | [ghostty](examples/grim-scry/ghostty-2026-07-26.md) |
+| `/grim-repo` | [throneroom](examples/grim-repo/throneroom-2026-07-26.md) |
+| `/grim-forge` | [11ty buildawesome](examples/grim-forge/11ty-2026-07-30.md) |
 
 ## Install
 

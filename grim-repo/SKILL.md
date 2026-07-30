@@ -101,6 +101,28 @@ Glyphs:
 - `▲` status / delta
 - `●` branch or snapshot
 
+Rules above are authoritative; below is drawing guide only.
+
+```text
+repository/
+╞══════════════════◆
+│
+├─ ./
+│  ├─▲ no-up
+│  ├─▲ +17 -6
+│  └─● main
+│
+├─ projects/dotfiles/
+│  ├─▲ ↑0 ↓0
+│  ├─▲ +8 -8
+│  └─● main
+│
+└─ projects/site/
+   ├─▲ ↑0 ↓0
+   ├─▲ +120 -229
+   └─● main
+```
+
 ## Usage
 
 ```text
