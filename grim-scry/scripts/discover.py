@@ -1,17 +1,5 @@
 #!/usr/bin/env python3
-"""
-Deterministic seed discovery for `/grim-scry` via find(1).
-
-Lists ranked file paths the agent may read as seeds for a Scry Lantern. Does not
-read file contents or emit a viewport.
-
-Pipeline:
-  1. find(1) under target for seed basenames (SEED_BASENAME_PATTERNS)
-  2. Prune vendor/build/cache directory names (PRUNE_DIR_NAMES)
-  3. Dedupe by realpath, sort shallow-first, apply budget K
-
-Stdout: flat paths, one `./relative` path per line. Does not honor .gitignore.
-"""
+"""Collect bounded documentation seeds for `/grim-scry`."""
 
 from __future__ import annotations
 
@@ -21,7 +9,6 @@ import os
 import subprocess
 import sys
 
-# Directory names: any path segment match prunes the subtree (find + post-filter).
 PRUNE_DIR_NAMES: frozenset[str] = frozenset(
     {
         ".git",
@@ -43,7 +30,6 @@ PRUNE_DIR_NAMES: frozenset[str] = frozenset(
     }
 )
 
-# Basename globs for seed files (-iname in find; case-insensitive fnmatch in Python).
 SEED_BASENAME_PATTERNS: tuple[str, ...] = (
     "readme",
     "readme.*",
@@ -60,20 +46,17 @@ SEED_BASENAME_PATTERNS: tuple[str, ...] = (
 
 
 def to_display_file(rel: str) -> str:
-    """Normalize a relative path to `./posix/style` for stable stdout lines."""
     rel = rel.replace(os.sep, "/").lstrip("/")
     return "./" + rel if not rel.startswith("./") else rel
 
 
 def segments(rel_path: str) -> list[str]:
-    """Split a display path into non-empty path segments (no leading `./`)."""
     p = rel_path[2:] if rel_path.startswith("./") else rel_path
     p = p.rstrip("/")
     return [s for s in p.split("/") if s]
 
 
 def is_under_pruned_dir(rel_path: str) -> bool:
-    """True when any parent segment is in PRUNE_DIR_NAMES."""
     parts = segments(rel_path)
     if len(parts) <= 1:
         return False
@@ -81,13 +64,11 @@ def is_under_pruned_dir(rel_path: str) -> bool:
 
 
 def is_seed_file(name: str) -> bool:
-    """True when basename matches SEED_BASENAME_PATTERNS (case-insensitive)."""
     lower = name.lower()
     return any(fnmatch.fnmatch(lower, pattern.lower()) for pattern in SEED_BASENAME_PATTERNS)
 
 
 def _find_or_name_args(names: frozenset[str] | tuple[str, ...]) -> list[str]:
-    """Build find(1) argument group: `(-name a -o -name b ...)`."""
     ordered = sorted(names) if isinstance(names, frozenset) else list(names)
     args: list[str] = ["("]
     for i, name in enumerate(ordered):
@@ -99,7 +80,6 @@ def _find_or_name_args(names: frozenset[str] | tuple[str, ...]) -> list[str]:
 
 
 def _find_or_iname_args(patterns: tuple[str, ...]) -> list[str]:
-    """Build find(1) argument group: `(-iname pat -o ...)`."""
     args: list[str] = ["("]
     for i, pattern in enumerate(patterns):
         if i > 0:
@@ -110,17 +90,10 @@ def _find_or_iname_args(patterns: tuple[str, ...]) -> list[str]:
 
 
 def _find_prune_args() -> list[str]:
-    """find prune clause for PRUNE_DIR_NAMES directory segments."""
     return [*_find_or_name_args(PRUNE_DIR_NAMES), "-type", "d", "-prune"]
 
 
 def find_candidates(target_root: str) -> list[str]:
-    """
-    Run find(1) for seed basename patterns under target_root.
-
-    Returns absolute file paths. Prunes known vendor/build dirs during the walk.
-    Does not apply shallow sort or budget; see discover().
-    """
     proc = subprocess.run(
         [
             "find",
@@ -145,12 +118,6 @@ def find_candidates(target_root: str) -> list[str]:
 
 
 def discover(target_root: str, budget: int) -> list[str]:
-    """
-    Rank and cap seed paths for grim-scry.
-
-    Filters find results with is_seed_file and is_under_pruned_dir, dedupes by
-    realpath, sorts by (segment depth, path), returns up to budget display paths.
-    """
     if budget < 1:
         return []
 
@@ -175,7 +142,6 @@ def discover(target_root: str, budget: int) -> list[str]:
 
 
 def main() -> int:
-    """CLI entry: print ranked seed paths, one per line."""
     ap = argparse.ArgumentParser(
         description="Discover ranked seed paths for grim-scry (flat stdout)"
     )

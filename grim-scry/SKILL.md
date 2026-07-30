@@ -70,10 +70,32 @@ North star: at-a-glance. Every section stays tight and high-level.
 
 | Part | Required | Holds |
 | --- | --- | --- |
-| Title + one-line distillation | yes | Outside fence: `# Grim Scry: <project>` and one line |
+| Title | yes | Outside fence: `# Grim Scry: <project>` |
+| Blurb | yes | One-liner distillation |
 | Scry Lantern | yes | `text` fence: tree only |
-| `# Summary` | yes | One short paragraph; high-level shape only |
-| `Observations:` | yes | ≤3 `-` bullets; high-signal only |
+| Summary | yes | One short paragraph; high-level shape only |
+| Observations: | yes | ≤3 `-` bullets; high-signal only |
+
+### Rendered output
+
+````markdown
+# Grim Scry: <project>
+
+<blurb>
+
+```text
+<scry-lantern>
+```
+
+# Summary
+
+<summary>
+
+Observations:
+- <observation>
+- <observation>
+- <observation>
+````
 
 ### Scry Lantern
 

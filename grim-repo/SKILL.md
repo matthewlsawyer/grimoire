@@ -67,7 +67,17 @@ If a repo fails, note in chat and omit or partial that row; do not invent metric
 | Part | Required | Holds |
 | --- | --- | --- |
 | Title | yes | `# Grim Repo: <project>` outside the fence |
-| Board | yes | `text` fence: full census stdout |
+| Census | yes | `text` fence: full census stdout |
+
+### Rendered output
+
+````markdown
+# Grim Repo: <project>
+
+```text
+<census-stdout>
+```
+````
 
 ### Board layout
 
