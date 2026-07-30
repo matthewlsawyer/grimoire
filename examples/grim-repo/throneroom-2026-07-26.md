@@ -3,8 +3,7 @@
 | Target | throneroom (local workspace) |
 | Model | Composer 2.5 |
 | Ran with | Cursor |
-| Prompt | `/grimrepo` |
-| Runtime | 4s (nested root discovery + git status per repo) |
+| Prompt | `/grim-repo` |
 | Date | 2026-07-26 |
 
 # Grim Repo: throneroom

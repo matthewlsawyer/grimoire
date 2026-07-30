@@ -1,8 +1,8 @@
 ---
-name: grimscry
+name: grim-scry
 description: >-
   Given a repository or workspace, produce a simple canonical understanding.
-  Use when the user invokes grimscry or wants an at-a-glance conceptual map
+  Use when the user invokes grim-scry or wants an at-a-glance conceptual map
   of a project.
 ---
 
@@ -70,10 +70,32 @@ North star: at-a-glance. Every section stays tight and high-level.
 
 | Part | Required | Holds |
 | --- | --- | --- |
-| Title + one-line distillation | yes | Outside fence: `# Grim Scry: <project>` and one line |
+| Title | yes | Outside fence: `# Grim Scry: <project>` |
+| Blurb | yes | One-liner distillation |
 | Scry Lantern | yes | `text` fence: tree only |
-| `# Summary` | yes | One short paragraph; high-level shape only |
-| `Observations:` | yes | ≤3 `-` bullets; high-signal only |
+| Summary | yes | One short paragraph; high-level shape only |
+| Observations: | yes | ≤3 `-` bullets; high-signal only |
+
+### Rendered output
+
+````markdown
+# Grim Scry: <project>
+
+<blurb>
+
+```text
+<scry-lantern>
+```
+
+# Summary
+
+<summary>
+
+Observations:
+- <observation>
+- <observation>
+- <observation>
+````
 
 ### Scry Lantern
 
@@ -101,12 +123,13 @@ Style:
 Rules above are authoritative; below is drawing guide only.
 
 ```text
-Workspace
-├─ⓘ Go todo api surface
+workspace/
+├─ⓘ Example golang api surface
 ╞══════════════════◆
 │
 ├─≣ Runtime
-│  ├─ⓘ Runtime complexities
+│  ├─ⓘ Runtime notes
+│  ├─ⓘ Other complexities
 │  ├─ server/
 │  └─ client/
 │
@@ -120,6 +143,7 @@ Workspace
 │  └─▶ npm test
 │
 ├─≣ Docs
+│  ├─ docs/README.md
 │  └─▶ npm run docs
 │
 └─≣ Guidance
@@ -129,13 +153,13 @@ Workspace
 
 ## Usage
 
-Call `/grimscry` with a target or infer the current workspace.
+Call `/grim-scry` with a target or infer the current workspace.
 
 ```text
-/grimscry packages/api/
-/grimscry .
-/grimscry
-/grimscry https://github.com/example/repo
+/grim-scry packages/api/
+/grim-scry .
+/grim-scry
+/grim-scry https://github.com/example/repo
 ```
 
 ## Boundaries

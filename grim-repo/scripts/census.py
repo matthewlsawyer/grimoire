@@ -1,16 +1,6 @@
 #!/usr/bin/env python3
 """
-Read-only helper for `/grim-repo`: live nested-repo census.
-
-Finds every git root under a target directory, collects branch, upstream sync,
-and working-tree diff metrics per repo, then renders one Unicode status board.
-
-Pipeline:
-  1. find(1) for `.git` files and directories
-  2. Per repo: branch (or detached), ahead/behind, numstat diff + untracked lines
-  3. render_census() draws the board (agent fences stdout as-is)
-
-Glyphs: `▲` sync and diff metrics; `●` branch name.
+Build the live nested-repository census for `/grim-repo`.
 
 Example stdout::
 
@@ -35,24 +25,20 @@ import os
 import subprocess
 import sys
 from dataclasses import dataclass
-from typing import List, Tuple
 
 
 @dataclass(frozen=True)
 class RepoBlock:
-    """One repo row on the census board: display path and three status tokens."""
-
     repo_display: str
     branch_token: str
     diff_token: str
     sync_token: str
 
 
-def run(cmd: List[str], cwd: str) -> Tuple[int, str]:
-    """Run a subprocess with C locale; return (exit_code, stdout stripped)."""
+def git_result(command: list[str], cwd: str) -> tuple[int, str]:
     env = {**os.environ, "LC_ALL": "C", "LANG": "C"}
     p = subprocess.run(
-        cmd,
+        command,
         cwd=cwd,
         stdout=subprocess.PIPE,
         stderr=subprocess.DEVNULL,
@@ -64,20 +50,13 @@ def run(cmd: List[str], cwd: str) -> Tuple[int, str]:
 
 
 def _rel_display(target_root: str, repo_abs: str) -> str:
-    """Format a repo absolute path as a display path ending in `/` (or `./`)."""
     rel = os.path.relpath(repo_abs, target_root)
     if rel in (".", ""):
         return "./"
     return rel.replace(os.sep, "/") + "/"
 
 
-def discover_roots(target_root: str) -> List[str]:
-    """
-    Find nested git repository roots under target via find(1).
-
-    Handles `.git` as directory or gitfile. Returns sorted display paths
-    (shallow paths first). Dedupes by realpath of repo root.
-    """
+def discover_roots(target_root: str) -> list[str]:
     proc = subprocess.run(
         [
             "find",
@@ -107,7 +86,7 @@ def discover_roots(target_root: str) -> List[str]:
         print(proc.stderr or "find failed", file=sys.stderr)
         return []
 
-    found: List[str] = []
+    found: list[str] = []
     seen: set[str] = set()
     for line in proc.stdout.splitlines():
         git_path = line.strip()
@@ -124,8 +103,7 @@ def discover_roots(target_root: str) -> List[str]:
     return found
 
 
-def resolve_repo(rel: str, target_root: str) -> Tuple[str, str]:
-    """Map a census display path to (absolute_repo_path, display_path_with_slash)."""
+def resolve_repo(rel: str, target_root: str) -> tuple[str, str]:
     if rel == "./":
         return target_root, "./"
     display = rel.rstrip("/") + "/"
@@ -133,41 +111,31 @@ def resolve_repo(rel: str, target_root: str) -> Tuple[str, str]:
 
 
 def token_branch(repo_path: str) -> str:
-    """
-    Current branch name, or DETACHED@<shortsha> when HEAD is not a symbolic ref.
-
-    Raises RuntimeError when git cannot resolve HEAD.
-    """
-    code, _ = run(["git", "symbolic-ref", "-q", "HEAD"], cwd=repo_path)
+    code, _ = git_result(["git", "symbolic-ref", "-q", "HEAD"], cwd=repo_path)
     if code != 0:
-        sha_code, shortsha = run(["git", "rev-parse", "--short=7", "HEAD"], cwd=repo_path)
+        sha_code, shortsha = git_result(["git", "rev-parse", "--short=7", "HEAD"], cwd=repo_path)
         if sha_code != 0 or not shortsha:
             raise RuntimeError(f"git rev-parse failed in {repo_path}")
         return f"DETACHED@{shortsha}"
 
-    code, branch = run(["git", "branch", "--show-current"], cwd=repo_path)
+    code, branch = git_result(["git", "branch", "--show-current"], cwd=repo_path)
     if code != 0 or not branch:
         raise RuntimeError(f"git branch --show-current failed in {repo_path}")
     return branch
 
 
 def token_sync(repo_path: str) -> str:
-    """
-    Upstream sync summary: `↑ahead ↓behind`, or `no-remote` / `no-up`.
-
-    Uses @{upstream}...HEAD rev-list counts. Raises RuntimeError on git failure.
-    """
-    code, remotes = run(["git", "remote"], cwd=repo_path)
+    code, remotes = git_result(["git", "remote"], cwd=repo_path)
     if code != 0:
         raise RuntimeError(f"git remote failed in {repo_path}")
     if not remotes:
         return "no-remote"
 
-    up_code, _ = run(["git", "rev-parse", "--abbrev-ref", "@{upstream}"], cwd=repo_path)
+    up_code, _ = git_result(["git", "rev-parse", "--abbrev-ref", "@{upstream}"], cwd=repo_path)
     if up_code != 0:
         return "no-up"
 
-    count_code, counts = run(
+    count_code, counts = git_result(
         ["git", "rev-list", "--left-right", "--count", "@{upstream}...HEAD"],
         cwd=repo_path,
     )
@@ -181,8 +149,7 @@ def token_sync(repo_path: str) -> str:
     return f"↑{ahead} ↓{behind}"
 
 
-def _sum_numstat(text: str) -> Tuple[int, int]:
-    """Sum added/deleted line counts from git diff --numstat output."""
+def _sum_numstat(text: str) -> tuple[int, int]:
     added = 0
     deleted = 0
     for line in text.splitlines():
@@ -198,12 +165,7 @@ def _sum_numstat(text: str) -> Tuple[int, int]:
 
 
 def _count_untracked_lines(repo_path: str) -> int:
-    """
-    Count lines in untracked non-binary files (git ls-files -o).
-
-    Binary files are skipped when the first 4KiB contains a null byte.
-    """
-    code, files = run(["git", "ls-files", "-o", "--exclude-standard"], cwd=repo_path)
+    code, files = git_result(["git", "ls-files", "-o", "--exclude-standard"], cwd=repo_path)
     if code != 0 or not files:
         return 0
     total = 0
@@ -224,15 +186,10 @@ def _count_untracked_lines(repo_path: str) -> int:
 
 
 def token_diff(repo_path: str) -> str:
-    """
-    Working tree delta vs HEAD as `+added -deleted` including untracked line count.
-
-    Falls back to unstaged + staged numstat when diff against HEAD is unavailable.
-    """
-    code, out = run(["git", "diff", "--numstat", "HEAD"], cwd=repo_path)
+    code, out = git_result(["git", "diff", "--numstat", "HEAD"], cwd=repo_path)
     if code != 0:
-        _, unstaged = run(["git", "diff", "--numstat"], cwd=repo_path)
-        _, staged = run(["git", "diff", "--cached", "--numstat"], cwd=repo_path)
+        _, unstaged = git_result(["git", "diff", "--numstat"], cwd=repo_path)
+        _, staged = git_result(["git", "diff", "--cached", "--numstat"], cwd=repo_path)
         added, deleted = _sum_numstat(unstaged)
         a2, d2 = _sum_numstat(staged)
         added += a2
@@ -244,14 +201,8 @@ def token_diff(repo_path: str) -> str:
     return f"+{added} -{deleted}"
 
 
-def render_census(target_leaf: str, blocks: List[RepoBlock]) -> str:
-    """
-    Draw the grim-repo status board for all RepoBlock rows.
-
-    target_leaf is the basename of the search root (header line). Each repo shows
-    sync (▲), diff (▲), then branch (●). Deterministic for a given blocks list.
-    """
-    lines: List[str] = [
+def render_census(target_leaf: str, blocks: list[RepoBlock]) -> str:
+    lines: list[str] = [
         f"{target_leaf}/",
         "╞══════════════════◆",
         "│",
@@ -271,7 +222,6 @@ def render_census(target_leaf: str, blocks: List[RepoBlock]) -> str:
 
 
 def main() -> int:
-    """CLI entry: discover repos under --target, print board or errors to stderr."""
     ap = argparse.ArgumentParser(description="Live grim-repo status board under a target")
     ap.add_argument(
         "--target",
@@ -286,8 +236,8 @@ def main() -> int:
         return 2
 
     rel_paths = discover_roots(target_root)
-    blocks: List[RepoBlock] = []
-    errors: List[str] = []
+    blocks: list[RepoBlock] = []
+    errors: list[str] = []
 
     for rel in rel_paths:
         repo_path, repo_display = resolve_repo(rel, target_root)

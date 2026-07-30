@@ -17,69 +17,40 @@ A spellbook of at-a-glance agent skills.
 
 You open a workspace cold. You open the README and read a couple lines. You eventually open the agent window.
 
-> "What's going on here?"
+> What's going on here?
 
 The usual response is paragraphs you don't need. What you're looking for is _shape_.
 
 ---
 
-Grimoire spells put **shape** into the session: bounded viewports the agent composes from evidence. Orientation, not omniscience; cast from within an agent session.
+Grimoire spells put evidence into the session: bounded discovery, live state, and durable artifacts. Cast from within an agent session.
 
 Reason with the results.
 
-## grimscry
-
-`/grimscry` distills a target into one concept lantern - ideas hang first, named commands underneath.
-
-[grimscry/SKILL.md](grimscry/SKILL.md)
-
-## grimweave
-
-`/grimweave` follows a file, symbol, or phrase into definitions, relationships, provenance, and threads worth pulling next.
-
-[grimweave/SKILL.md](grimweave/SKILL.md)
-
-## grimrepo
-
-`/grimrepo` censuses every nested git root and puts branch, sync, and working-tree deltas on one board so you can see work-in-flight before the next task.
-
-[grimrepo/SKILL.md](grimrepo/SKILL.md)
-
-## Scripts
-
-Ship inside each skill directory (`<skill-root>/scripts/`).
-
-| Spell | Script |
+| Spell | Intent |
 | --- | --- |
-| `/grimscry` | [discover.py](grimscry/scripts/discover.py) |
-| `/grimweave` | [weave.py](grimweave/scripts/weave.py) |
-| `/grimrepo` | [census.py](grimrepo/scripts/census.py) |
+| Grim Scry | Discover understanding. |
+| Grim Repo | Survey the workspace. |
+| Grim Forge | Maintain provenance. |
 
-Stdout:
+## grim-scry
 
-- `/grimscry` - seed paths, one `./rel` per line
-- `/grimweave` - JSON evidence floor (`kind`: `weave_evidence`)
-- `/grimrepo` - full census board (fence as-is)
+Grim Scry gives insight into the conceptual _shape of a project_.
 
-Example invocations (absolute `--target` only):
+`/grim-scry` distills a target into one concept lantern - ideas hang first, named commands underneath.
 
-```bash
-python3 grimscry/scripts/discover.py --target /abs/workspace --budget 50
-python3 grimrepo/scripts/census.py --target /abs/workspace
-python3 grimweave/scripts/weave.py --target /abs/workspace --token MySymbol
-```
+[grim-scry/SKILL.md](grim-scry/SKILL.md)
 
-## At-a-glance viewports
-
-Example Grim Scry template:
+Example viewport:
 
 ```text
-Workspace
-├─ⓘ Go todo api surface
+workspace/
+├─ⓘ Example golang api surface
 ╞══════════════════◆
 │
 ├─≣ Runtime
-│  ├─ⓘ Runtime complexities
+│  ├─ⓘ Runtime notes
+│  ├─ⓘ Other complexities
 │  ├─ server/
 │  └─ client/
 │
@@ -93,11 +64,97 @@ Workspace
 │  └─▶ npm test
 │
 ├─≣ Docs
+│  ├─ docs/README.md
 │  └─▶ npm run docs
 │
 └─≣ Guidance
    └─ AGENTS.md
       └─ⓘ Agent source of truth
+```
+
+## grim-repo
+
+Grim Repo gives insight into a _project in motion_.
+
+`/grim-repo` censuses every nested git root and puts branch, sync, and working-tree deltas on one board so you can see work-in-flight before the next task.
+
+[grim-repo/SKILL.md](grim-repo/SKILL.md)
+
+Example viewport:
+
+```text
+workspace/
+╞══════════════════◆
+│
+├─ ./
+│  ├─▲ ↑2 ↓0
+│  ├─▲ +540 -6
+│  └─● main
+│
+├─ projects/dotfiles/
+│  ├─▲ ↑0 ↓0
+│  ├─▲ +8 -8
+│  └─● main
+│
+└─ projects/site/
+   ├─▲ ↑0 ↓0
+   ├─▲ +318 -229
+   └─● main
+```
+
+## grim-forge
+
+Grim Forge maintains a project's _provenance over time_.
+
+`/grim-forge` bootstraps or updates `CHANGELOG.md` and `HISTORY.md` per git root from bounded history since the last marker.
+
+[grim-forge/SKILL.md](grim-forge/SKILL.md)
+
+Example viewport:
+
+```text
+workspace/
+╞══════════════════◆
+│
+├─ CHANGELOG.md
+│  └─ ## [Unreleased]
+│     ├─ ### Added
+│     └─ ### Changed
+│
+└─ HISTORY.md
+   ├─ marker: none -> abc1234
+   ├─ ## Story
+   └─ ## Timeline
+      └─ ### 2026-07-29
+```
+
+## Scripts
+
+Ship inside each skill directory (`<skill-root>/scripts/`).
+
+| Spell | Script |
+| --- | --- |
+| `/grim-scry` | [discover.py](grim-scry/scripts/discover.py) |
+| `/grim-repo` | [census.py](grim-repo/scripts/census.py) |
+| `/grim-forge` | [status.py](grim-forge/scripts/status.py) |
+
+Stdout:
+
+- `/grim-scry` - seed paths, one `./rel` per line
+- `/grim-repo` - full census board (fence as-is)
+- `/grim-forge` - status JSON evidence manifest
+
+Example invocations (absolute paths only):
+
+```bash
+# scry
+python3 grim-scry/scripts/discover.py --target /abs/workspace --budget 50
+
+# repo
+python3 grim-repo/scripts/census.py --target /abs/workspace
+
+# forge
+python3 grim-forge/scripts/status.py --target /abs/workspace
 ```
 
 ## Glyph Dictionary
@@ -115,13 +172,13 @@ Workspace
 
 ## Examples
 
-Sample runs (metadata + viewport): [examples/](examples/).
+Sample runs: [examples/](examples/).
 
 | Spell | Run |
 | --- | --- |
-| `/grimscry` | [ghostty](examples/grimscry/ghostty-2026-07-26.md) |
-| `/grimweave` | [ghostty-zig](examples/grimweave/ghostty-zig-2026-07-26.md) |
-| `/grimrepo` | [throneroom](examples/grimrepo/throneroom-2026-07-26.md) |
+| `/grim-scry` | [ghostty](examples/grim-scry/ghostty-2026-07-26.md) |
+| `/grim-repo` | [throneroom](examples/grim-repo/throneroom-2026-07-26.md) |
+| `/grim-forge` | [11ty buildawesome](examples/grim-forge/11ty-2026-07-30.md) |
 
 ## Install
 
@@ -138,9 +195,14 @@ Copies each skill into `.agents/skills/<skill-name>/` under the invoking directo
 From this directory (`projects/grimoire/`):
 
 ```bash
-python3 tests/grimscry/test.py
-python3 tests/grimrepo/test.py
-python3 tests/grimweave/test.py
+python3 tests/grim-scry/test.py
+python3 tests/grim-repo/test.py
+python3 tests/grim-forge/test.py
 ```
 
 Standard-library `unittest` only. Spell scripts load by path via `[tests/load_script.py](tests/load_script.py)`.
+
+## Roadmap
+
+- Grim Scry: accept repositories, directories, files, symbols, and arbitrary tokens as discovery entry points.
+- Grim Repo: add agentic insights about in-flight work on top of its deterministic census.

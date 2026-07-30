@@ -1,8 +1,8 @@
 ---
-name: grimrepo
+name: grim-repo
 description: >-
   Given a workspace or directory, reveal nested git repositories and their
-  current status. Use when the user invokes grimrepo or needs a nested-repo
+  current status. Use when the user invokes grim-repo or needs a nested-repo
   census board.
 ---
 
@@ -67,7 +67,17 @@ If a repo fails, note in chat and omit or partial that row; do not invent metric
 | Part | Required | Holds |
 | --- | --- | --- |
 | Title | yes | `# Grim Repo: <project>` outside the fence |
-| Board | yes | `text` fence: full census stdout |
+| Census | yes | `text` fence: full census stdout |
+
+### Rendered output
+
+````markdown
+# Grim Repo: <project>
+
+```text
+<census-stdout>
+```
+````
 
 ### Board layout
 
@@ -91,11 +101,33 @@ Glyphs:
 - `▲` status / delta
 - `●` branch or snapshot
 
+Rules above are authoritative; below is drawing guide only.
+
+```text
+repository/
+╞══════════════════◆
+│
+├─ ./
+│  ├─▲ no-up
+│  ├─▲ +17 -6
+│  └─● main
+│
+├─ projects/dotfiles/
+│  ├─▲ ↑0 ↓0
+│  ├─▲ +8 -8
+│  └─● main
+│
+└─ projects/site/
+   ├─▲ ↑0 ↓0
+   ├─▲ +120 -229
+   └─● main
+```
+
 ## Usage
 
 ```text
-/grimrepo
-/grimrepo /path/to/workspace
+/grim-repo
+/grim-repo /path/to/workspace
 ```
 
 ## Boundaries
