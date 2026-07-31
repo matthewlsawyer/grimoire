@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Collect bounded documentation seeds for `/grim-scry`."""
+"""Collect documentation seeds for `/grim-scry`."""
 
 from __future__ import annotations
 
@@ -43,6 +43,8 @@ SEED_BASENAME_PATTERNS: tuple[str, ...] = (
     "index.yml",
     "index.json",
 )
+
+ADR_DIRS: tuple[str, ...] = ("docs/adrs", "adrs")
 
 
 def to_display_file(rel: str) -> str:
@@ -93,19 +95,15 @@ def _find_prune_args() -> list[str]:
     return [*_find_or_name_args(PRUNE_DIR_NAMES), "-type", "d", "-prune"]
 
 
-def find_candidates(target_root: str) -> list[str]:
+def run_find(root: str, extra_args: list[str]) -> list[str]:
     proc = subprocess.run(
         [
             "find",
-            target_root,
+            root,
             *_find_prune_args(),
             "-o",
-            "(",
-            "-type",
-            "f",
-            *_find_or_iname_args(SEED_BASENAME_PATTERNS),
+            *extra_args,
             "-print",
-            ")",
         ],
         capture_output=True,
         text=True,
@@ -117,28 +115,52 @@ def find_candidates(target_root: str) -> list[str]:
     return [ln.strip() for ln in proc.stdout.splitlines() if ln.strip()]
 
 
-def discover(target_root: str, budget: int) -> list[str]:
-    if budget < 1:
-        return []
+def find_candidates(target_root: str) -> list[str]:
+    return run_find(
+        target_root,
+        ["(", "-type", "f", *_find_or_iname_args(SEED_BASENAME_PATTERNS), ")"],
+    )
 
+
+def find_adr_candidates(target_root: str) -> list[str]:
+    paths: list[str] = []
+    for rel_dir in ADR_DIRS:
+        adr_root = os.path.join(target_root, rel_dir)
+        if not os.path.isdir(adr_root):
+            continue
+        paths.extend(run_find(adr_root, ["-type", "f", "-name", "*.md"]))
+    return paths
+
+
+def append_path(
+    found: list[str],
+    seen: set[str],
+    abs_path: str,
+    target_root: str,
+) -> None:
+    rel = os.path.relpath(abs_path, target_root)
+    display = to_display_file(rel)
+    if is_under_pruned_dir(display):
+        return
+    key = os.path.realpath(abs_path)
+    if key in seen:
+        return
+    seen.add(key)
+    found.append(display)
+
+
+def discover(target_root: str) -> list[str]:
     found: list[str] = []
     seen: set[str] = set()
     for abs_path in find_candidates(target_root):
-        name = os.path.basename(abs_path)
-        if not is_seed_file(name):
+        if not is_seed_file(os.path.basename(abs_path)):
             continue
-        rel = os.path.relpath(abs_path, target_root)
-        display = to_display_file(rel)
-        if is_under_pruned_dir(display):
-            continue
-        key = os.path.realpath(abs_path)
-        if key in seen:
-            continue
-        seen.add(key)
-        found.append(display)
+        append_path(found, seen, abs_path, target_root)
+    for abs_path in find_adr_candidates(target_root):
+        append_path(found, seen, abs_path, target_root)
 
     found.sort(key=lambda p: (len(segments(p)), p))
-    return found[:budget]
+    return found
 
 
 def main() -> int:
@@ -150,24 +172,14 @@ def main() -> int:
         default=".",
         help="Directory to discover under. Skill should pass an absolute path.",
     )
-    ap.add_argument(
-        "--budget",
-        type=int,
-        default=50,
-        help="Max ranked seed paths to emit (default 50).",
-    )
     args = ap.parse_args()
-
-    if args.budget < 1:
-        print("--budget must be >= 1", file=sys.stderr)
-        return 2
 
     target_root = os.path.abspath(args.target)
     if not os.path.isdir(target_root):
         print(f"target not found: {target_root}", file=sys.stderr)
         return 2
 
-    for p in discover(target_root, budget=args.budget):
+    for p in discover(target_root):
         print(p)
 
     return 0
