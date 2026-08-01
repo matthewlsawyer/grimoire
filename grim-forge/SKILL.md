@@ -5,9 +5,7 @@ description: >-
   Use when the user invokes grim-forge or wants to create a historical ledger.
 ---
 
-# Grim Forge
-
-_What is forged may never fade._
+# Forge
 
 Produce and maintain a historical ledger that captures the history of your project.
 
@@ -19,9 +17,12 @@ Produce and maintain a historical ledger that captures the history of your proje
 
 ## Distill
 
-1. Always read `HISTORY.md` and root README when present. Read other documentation (ADRs, AGENTS.md, design docs) only when the commit range shows they changed or when the story needs corroboration. Use `git log --name-status` to find candidates. Use `find` or directory listing only when git history is thin and genesis needs a shallow doc pass.
+1. Always read `HISTORY.md`, CHANGELOG, and root README when present.
+  - Read other documentation (ADRs, AGENTS.md, design docs) when the commit range shows they changed or when the story needs corroboration.
+  - Optionally use `git log --name-status` to find candidates.
+  - Optionally use `find` or directory listing when git history is thin and genesis needs a shallow doc pass.
 2. Resolve `history_commit` via `git -C {target} log -1 --format=%h -- HISTORY.md`.
-3. Hunt git logs for story (`history_commit..HEAD` or full log). Walk git log (`--no-merges`, subjects + bodies, `--name-status` when needed):
+3. Hunt git logs for story (`history_commit..HEAD` or full log). Walk git log (`--no-merges`, subjects + bodies, `--name-status`) when needed:
   - Notice themes, turning points, refactors, releases.
   - Treat ADR/doc touches as high salience.
   - Skip noise (`chore(deps)`, etc.).
