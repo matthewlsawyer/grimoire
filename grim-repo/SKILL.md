@@ -5,9 +5,7 @@ description: >-
   Use when the user invokes grim-repo or needs a nested-repo census board.
 ---
 
-# Grim Repo
-
-_What lives must be named._
+# Repo
 
 Produce a report that distills an at-a-glance census of git roots in the workspace.
 
