@@ -6,9 +6,7 @@ description: >-
   of a project.
 ---
 
-# Grim Scry
-
-_You must see before you act._
+# Scry
 
 Produce a report that distills a simple at-a-glance understanding of the workspace.
 
