@@ -19,20 +19,21 @@ class DiscoverTests(unittest.TestCase):
             vendor = root / "node_modules" / "pkg"
             vendor.mkdir(parents=True)
             (vendor / "README.md").write_text("# hidden\n", encoding="utf-8")
-            seeds = discover.discover(str(root), budget=50)
+            seeds = discover.discover(str(root))
             paths = {p for p in seeds}
             self.assertIn("./README.md", paths)
             self.assertFalse(any("node_modules" in p for p in paths))
 
-    def test_shallow_first_and_budget(self) -> None:
+    def test_shallow_first(self) -> None:
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)
             (root / "README.md").write_text("# shallow\n", encoding="utf-8")
             deep = root / "a" / "b" / "c"
             deep.mkdir(parents=True)
             (deep / "README.md").write_text("# deep\n", encoding="utf-8")
-            seeds = discover.discover(str(root), budget=1)
-            self.assertEqual(seeds, ["./README.md"])
+            seeds = discover.discover(str(root))
+            self.assertEqual(seeds[0], "./README.md")
+            self.assertIn("./a/b/c/README.md", seeds)
 
     def test_is_seed_file_agents(self) -> None:
         self.assertTrue(discover.is_seed_file("AGENTS.md"))

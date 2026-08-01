@@ -31,7 +31,7 @@ Reason with the results.
 | --- | --- |
 | Grim Scry | Discover understanding. |
 | Grim Repo | Survey the workspace. |
-| Grim Forge | Maintain provenance. |
+| Grim Forge | Maintain historical provenance. |
 
 ## grim-scry
 
@@ -106,55 +106,44 @@ workspace/
 
 Grim Forge maintains a project's _provenance over time_.
 
-`/grim-forge` bootstraps or updates `CHANGELOG.md` and `HISTORY.md` per git root from bounded history since the last marker, then shows a summary viewport of the delta.
+`/grim-forge` bootstraps or updates `HISTORY.md` from bounded history since last run, then shows a summary viewport of the delta.
 
 [grim-forge/SKILL.md](grim-forge/SKILL.md)
 
 Example viewport:
 
 ```text
-workspace/
+workspace/HISTORY.md
 ╞══════════════════◆
 │
-├─ CHANGELOG.md
-│  └─ ## [Unreleased]
-│     ├─ ### Added
-│     └─ ### Changed
-│
-└─ HISTORY.md
-   ├─ marker: none -> abc1234
-   ├─ ## Story
-   └─ ## Timeline
-      └─ ### 2026-07-29
+├─ ≣ 2026-07-27
+│  └─ Hyphenated spell ids.
+└─ ≣ 2026-07-06
+   └─ Origins: skillit -> grimoire.
 ```
 
 ## Scripts
 
-Ship inside each skill directory (`<skill-root>/scripts/`).
+Ship inside each skill directory (`{skill-root}/scripts/`).
 
 | Spell | Script |
 | --- | --- |
 | `/grim-scry` | [discover.py](grim-scry/scripts/discover.py) |
 | `/grim-repo` | [census.py](grim-repo/scripts/census.py) |
-| `/grim-forge` | [status.py](grim-forge/scripts/status.py) |
 
 Stdout:
 
 - `/grim-scry` - seed paths, one `./rel` per line
 - `/grim-repo` - full census board (fence as-is)
-- `/grim-forge` - status JSON evidence manifest
 
 Example invocations (absolute paths only):
 
 ```bash
 # scry
-python3 grim-scry/scripts/discover.py --target /abs/workspace --budget 50
+python3 grim-scry/scripts/discover.py --target /abs/workspace
 
 # repo
 python3 grim-repo/scripts/census.py --target /abs/workspace
-
-# forge
-python3 grim-forge/scripts/status.py --target /abs/workspace
 ```
 
 ## Glyph Dictionary
@@ -176,8 +165,8 @@ Sample runs: [examples/](examples/).
 
 | Spell | Run |
 | --- | --- |
-| `/grim-scry` | [ghostty](examples/grim-scry/ghostty-2026-07-26.md) |
-| `/grim-repo` | [throneroom](examples/grim-repo/throneroom-2026-07-26.md) |
+| `/grim-scry` | [ghostty](examples/grim-scry/ghostty-2026-07-31.md) |
+| `/grim-repo` | [throneroom](examples/grim-repo/throneroom-2026-07-31.md) |
 | `/grim-forge` | [11ty buildawesome](examples/grim-forge/11ty-2026-07-30.md) |
 
 ## Install
@@ -188,7 +177,7 @@ From the project that should receive the spells:
 /path/to/grimoire/install.sh
 ```
 
-Copies each skill into `.agents/skills/<skill-name>/` under the invoking directory.
+Copies each skill into `.agents/skills/{skill-name}/` under the invoking directory.
 
 ## Tests
 
