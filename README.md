@@ -165,9 +165,9 @@ Sample runs: [examples/](examples/).
 
 | Spell | Run |
 | --- | --- |
-| `/grim-scry` | [ghostty](examples/grim-scry/ghostty-2026-07-31.md) |
+| `/grim-scry` | [buildawesome](examples/grim-scry/buildawesome-2026-07-31.md), [ghostty](examples/grim-scry/ghostty-2026-07-31.md) |
 | `/grim-repo` | [throneroom](examples/grim-repo/throneroom-2026-07-31.md) |
-| `/grim-forge` | [11ty buildawesome](examples/grim-forge/11ty-2026-07-30.md) |
+| `/grim-forge` | [buildawesome](examples/grim-forge/buildawesome-2026-07-31.md), [ghostty](examples/grim-forge/ghostty-2026-07-31.md) |
 
 ## Install
 
