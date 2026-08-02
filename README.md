@@ -32,6 +32,7 @@ Reason with the results.
 | Grim Scry | Discover understanding. |
 | Grim Repo | Survey the workspace. |
 | Grim Forge | Maintain historical provenance. |
+| Grim Notes | Capture and organize daily notes. |
 
 ## grim-scry
 
@@ -120,6 +121,44 @@ workspace/HISTORY.md
 │  └─ Hyphenated spell ids.
 └─ ≣ 2026-07-06
    └─ Origins: skillit -> grimoire.
+```
+
+## grim-notes
+
+Grim Notes captures a workspace's _daily notes_ into a monthly ledger.
+
+`/grim-notes` with a given context classifies notes, todos, and resources into `notes/YYYY-MM.md` under today's day heading, then shows a delta viewport. Bare `/grim-notes` shows a status snapshot of all month files.
+
+[grim-notes/SKILL.md](grim-notes/SKILL.md)
+
+Capture viewport:
+
+```text
+notes/
+╞══════════════════◆
+│
+└─≣ 2026-08.md
+   └─≣ 2026-08-02
+      ├─▲ +1 note
+      ├─▲ +2 todos
+      └─▲ +1 resource
+```
+
+Status viewport:
+
+```text
+notes/
+╞══════════════════◆
+│
+├─≣ 2026-08.md
+│  ├─● 1 note
+│  ├─● 2 todos
+│  └─● 1 resource
+│
+└─≣ 2026-07.md
+   ├─● 12 notes
+   ├─● 2 todos
+   └─● 15 resources
 ```
 
 ## Scripts
