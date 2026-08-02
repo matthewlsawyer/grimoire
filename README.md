@@ -32,6 +32,7 @@ Reason with the results.
 | Grim Scry | Discover understanding. |
 | Grim Repo | Survey the workspace. |
 | Grim Forge | Maintain historical provenance. |
+| Grim Notes | Capture and organize daily notes. |
 
 ## grim-scry
 
@@ -122,6 +123,44 @@ workspace/HISTORY.md
    └─ Origins: skillit -> grimoire.
 ```
 
+## grim-notes
+
+Grim Notes captures a workspace's _daily notes_ into a monthly ledger.
+
+`/grim-notes` with a given context classifies notes, todos, and resources into `notes/YYYY-MM.md` under today's day heading, then shows a delta viewport. Bare `/grim-notes` shows a status snapshot of all month files.
+
+[grim-notes/SKILL.md](grim-notes/SKILL.md)
+
+Capture viewport:
+
+```text
+notes/
+╞══════════════════◆
+│
+└─≣ 2026-08.md
+   └─≣ 2026-08-02
+      ├─▲ +1 note
+      ├─▲ +2 todos
+      └─▲ +1 resource
+```
+
+Status viewport:
+
+```text
+notes/
+╞══════════════════◆
+│
+├─≣ 2026-08.md
+│  ├─● 1 note
+│  ├─● 2 todos
+│  └─● 1 resource
+│
+└─≣ 2026-07.md
+   ├─● 12 notes
+   ├─● 2 todos
+   └─● 15 resources
+```
+
 ## Scripts
 
 Ship inside each skill directory (`{skill-root}/scripts/`).
@@ -168,6 +207,7 @@ Sample runs: [examples/](examples/).
 | `/grim-scry` | [buildawesome](examples/grim-scry/buildawesome-2026-07-31.md), [ghostty](examples/grim-scry/ghostty-2026-07-31.md) |
 | `/grim-repo` | [throneroom](examples/grim-repo/throneroom-2026-07-31.md) |
 | `/grim-forge` | [buildawesome](examples/grim-forge/buildawesome-2026-07-31.md), [ghostty](examples/grim-forge/ghostty-2026-07-31.md) |
+| `/grim-notes` | [throneroom](examples/grim-notes/throneroom-2026-08-02.md) |
 
 ## Install
 
