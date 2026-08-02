@@ -207,6 +207,7 @@ Sample runs: [examples/](examples/).
 | `/grim-scry` | [buildawesome](examples/grim-scry/buildawesome-2026-07-31.md), [ghostty](examples/grim-scry/ghostty-2026-07-31.md) |
 | `/grim-repo` | [throneroom](examples/grim-repo/throneroom-2026-07-31.md) |
 | `/grim-forge` | [buildawesome](examples/grim-forge/buildawesome-2026-07-31.md), [ghostty](examples/grim-forge/ghostty-2026-07-31.md) |
+| `/grim-notes` | [throneroom](examples/grim-notes/throneroom-2026-08-02.md) |
 
 ## Install
 
