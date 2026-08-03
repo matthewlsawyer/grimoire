@@ -22,7 +22,7 @@ grimoire/
 
 ---
 
-Grimoire is a spellbook of at-a-glance agent skills. Each spell distills one aspect of your workspace into a compact viewport for you, and your agents, to reason about.
+Grimoire is a spellbook of at-a-glance agent skills. Each spell distills one aspect of your workspace into a compact viewport for you and your agents to reason about.
 
 | Spell | Intent |
 | --- | --- |
@@ -77,7 +77,7 @@ grimoire/
 
 Grim Repo gives insight into a _project in motion_.
 
-`/grim-repo` censuses every nested git root and puts branch, sync, and working-tree deltas on one board so you can see work-in-flight before the next task.
+`/grim-repo` censuses every nested git root and presents branch, sync, and working-tree deltas on a single board.
 
 [grim-repo/SKILL.md](grim-repo/SKILL.md)
 
@@ -141,7 +141,7 @@ projects/grimoire/HISTORY.md
 
 Grim Notes captures a workspace's _daily notes_ into a monthly ledger.
 
-`/grim-notes` with a given context classifies notes, todos, and resources into `notes/YYYY-MM.md` under today's day heading, then shows a delta viewport. Bare `/grim-notes` shows a status snapshot of all month files.
+`/grim-notes` with a given context classifies notes, todos, and resources into `notes/YYYY-MM.md` under today's day heading, then shows a delta viewport. Bare `/grim-notes` shows a status snapshot across all monthly ledgers.
 
 [grim-notes/SKILL.md](grim-notes/SKILL.md)
 
@@ -166,30 +166,6 @@ notes/
 └─≣ 2026-08.md
    ├─● 1 note
    └─● 1 todo
-```
-
-## Scripts
-
-Ship inside each skill directory (`{skill-root}/scripts/`).
-
-| Spell | Script |
-| --- | --- |
-| `/grim-scry` | [discover.py](grim-scry/scripts/discover.py) |
-| `/grim-repo` | [census.py](grim-repo/scripts/census.py) |
-
-Stdout:
-
-- `/grim-scry` - seed paths, one `./rel` per line
-- `/grim-repo` - full census board (fence as-is)
-
-Example invocations (absolute paths only):
-
-```bash
-# scry
-python3 grim-scry/scripts/discover.py --target /abs/workspace
-
-# repo
-python3 grim-repo/scripts/census.py --target /abs/workspace
 ```
 
 ## Glyph Dictionary
@@ -225,6 +201,30 @@ From the project that should receive the spells:
 ```
 
 Copies each skill into `.agents/skills/{skill-name}/` under the invoking directory.
+
+## Scripts
+
+Ship inside each skill directory (`{skill-root}/scripts/`).
+
+| Spell | Script |
+| --- | --- |
+| `/grim-scry` | [discover.py](grim-scry/scripts/discover.py) |
+| `/grim-repo` | [census.py](grim-repo/scripts/census.py) |
+
+Stdout:
+
+- `/grim-scry` - seed paths, one `./rel` per line
+- `/grim-repo` - full census board (fence as-is)
+
+Example invocations (absolute paths only):
+
+```bash
+# scry
+python3 grim-scry/scripts/discover.py --target /abs/workspace
+
+# repo
+python3 grim-repo/scripts/census.py --target /abs/workspace
+```
 
 ## Tests
 
