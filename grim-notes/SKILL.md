@@ -14,13 +14,13 @@ Capture and organize daily notes into a monthly ledger under `notes/`.
 
 1. Resolve `target` to an absolute workspace root. Use cwd or named path. Empty means the current workspace root.
 2. Choose mode from the invocation:
-  - **Bare** (`/grim-notes` with no context): **Status**. See [Status](#status).
-  - **Context** (blurb, links, snippets, or mixed): **Capture**. See [Capture](#capture).
+  - **Bare** (`/grim-notes` with no prompt): **Status**. See [Status](#status).
+  - **Prompt** (blurb, links, snippets, or mixed): **Capture**. See [Capture](#capture).
 3. **Emit report**. See [Output](#output).
 
 ## Capture
 
-1. Classify the context into atomic items. See [Classify](#classify).
+1. Classify the prompt into atomic items. See [Classify](#classify).
 2. Resolve today as `YYYY-MM-DD` and the month file as `{target}/notes/YYYY-MM.md`.
 3. Create `notes/` and the month file if missing.
 4. Append into the month file using template [note.md](./templates/note.md):
@@ -30,7 +30,7 @@ Capture and organize daily notes into a monthly ledger under `notes/`.
 
 ## Classify
 
-Split the context into atomic items, then assign:
+Split the prompt into atomic items, then assign:
 
 | Bucket | Heuristic |
 | --- | --- |
@@ -38,7 +38,7 @@ Split the context into atomic items, then assign:
 | Todos | Action / obligation language ("I need to", "TODO", "figure out", "remind me to", imperative task lines) |
 | Notes | Everything else (freeform prose, observations) |
 
-One context may yield multiple buckets. Do not reclassify or rewrite existing ledger content.
+One prompt may yield multiple buckets. Do not reclassify or rewrite existing ledger content.
 
 ## Status
 

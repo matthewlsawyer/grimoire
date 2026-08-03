@@ -9,23 +9,22 @@
 │ ────┬┼┬──── ║
 │    ◇ ◆ ◇    ║
 ╰≡≡≡≡≡≡≡≡≡≡≡≡≡╝
+
+grimoire/
+├─ⓘ Spellbook of at-a-glance agent skills
+╞══════════════════◆
+│
+├─▶ /grim-scry
+├─▶ /grim-repo
+├─▶ /grim-forge
+└─▶ /grim-notes
 ```
 
-A spellbook of at-a-glance agent skills.
-
 ---
 
-You open a workspace cold. You open the README and read a couple lines. You eventually open the agent window.
+Grimoire is a spellbook of at-a-glance agent skills.
 
-> What's going on here?
-
-The usual response is paragraphs you don't need. What you're looking for is _shape_.
-
----
-
-Grimoire spells put evidence into the session: bounded discovery, live state, and durable artifacts. Cast from within an agent session.
-
-Reason with the results.
+Grimoire spells put evidence into the session: bounded discovery, live state, and durable artifacts. Cast from within an agent session. Reason with the results.
 
 | Spell | Intent |
 | --- | --- |
@@ -45,32 +44,35 @@ Grim Scry gives insight into the conceptual _shape of a project_.
 Example viewport:
 
 ```text
-workspace/
-├─ⓘ Example golang api surface
+grimoire/
+├─ⓘ Spellbook of at-a-glance agent skills
 ╞══════════════════◆
 │
-├─≣ Runtime
-│  ├─ⓘ Runtime notes
-│  ├─ⓘ Other complexities
-│  ├─ server/
-│  └─ client/
+├─≣ Spells
+│  ├─ⓘ Bounded discovery, live state, durable artifacts
+│  ├─▶ /grim-scry
+│  │  └─ⓘ Conceptual shape of a target
+│  ├─▶ /grim-repo
+│  │  └─ⓘ Nested git census board
+│  ├─▶ /grim-forge
+│  │  └─ⓘ HISTORY.md provenance ledger
+│  └─▶ /grim-notes
+│     └─ⓘ Monthly notes / todos / resources
 │
-├─≣ Packages
-│  └─ packages/core/
-│     └─ⓘ Main library
+├─≣ Scripts
+│  ├─ⓘ Live under each skill's scripts/
+│  ├─ grim-scry/scripts/discover.py
+│  └─ grim-repo/scripts/census.py
 │
-├─≣ Quality
-│  ├─▶ npm audit
-│  │  └─ⓘ full repo audit
-│  └─▶ npm test
+├─≣ Ship
+│  ├─▶ ./install.sh
+│  │  └─ⓘ Copies spells into .agents/skills/
+│  ├─ examples/
+│  └─ tests/
 │
-├─≣ Docs
-│  ├─ docs/README.md
-│  └─▶ npm run docs
-│
-└─≣ Guidance
-   └─ AGENTS.md
-      └─ⓘ Agent source of truth
+└─≣ Docs
+   └─ README.md
+      └─ⓘ Spell intents, glyphs, roadmap
 ```
 
 ## grim-repo
@@ -84,22 +86,27 @@ Grim Repo gives insight into a _project in motion_.
 Example viewport:
 
 ```text
-workspace/
+throneroom/
 ╞══════════════════◆
 │
 ├─ ./
-│  ├─▲ ↑2 ↓0
-│  ├─▲ +540 -6
+│  ├─▲ ↑0 ↓0
+│  ├─▲ +95 -0
 │  └─● main
 │
 ├─ projects/dotfiles/
 │  ├─▲ ↑0 ↓0
-│  ├─▲ +8 -8
+│  ├─▲ +35 -8
 │  └─● main
+│
+├─ projects/grimoire/
+│  ├─▲ ↑0 ↓0
+│  ├─▲ +66 -69
+│  └─● feat/grim-notes
 │
 └─ projects/site/
    ├─▲ ↑0 ↓0
-   ├─▲ +318 -229
+   ├─▲ +0 -0
    └─● main
 ```
 
@@ -111,16 +118,25 @@ Grim Forge maintains a project's _provenance over time_.
 
 [grim-forge/SKILL.md](grim-forge/SKILL.md)
 
-Example viewport:
+Example excerpt from history file:
+
+```markdown
+### Origins
+
+The repo began July 6, 2026 as a skills collection (`cb12339`), renamed to skillit the next day (`786ce80`) and grimoire on July 8 (`451261f`). Grim Scry arrived July 20 (`a031701`) as the first spell — canonical repo models distilled into session viewports. `install.sh` copied spells into invoking `.agents/skills/` (`0b5c1c5`); README framed spellbook axioms and roadmap (`82c236b`).
+```
+
+Example excerpt from viewport:
 
 ```text
-workspace/HISTORY.md
+projects/grimoire/HISTORY.md
 ╞══════════════════◆
 │
-├─ ≣ 2026-07-27
-│  └─ Hyphenated spell ids.
-└─ ≣ 2026-07-06
-   └─ Origins: skillit -> grimoire.
+├─≣ 2026-08-02
+│  └─ grim-notes arrives: daily notes/todos/resources ledger + examples.
+├─ ...
+└─≣ 2026-07-06 -> 2026-07-08
+   └─ Origins: skills -> skillit -> grimoire; first spell July 20.
 ```
 
 ## grim-notes
@@ -140,8 +156,7 @@ notes/
 └─≣ 2026-08.md
    └─≣ 2026-08-02
       ├─▲ +1 note
-      ├─▲ +2 todos
-      └─▲ +1 resource
+      └─▲ +1 todo
 ```
 
 Status viewport:
@@ -150,15 +165,9 @@ Status viewport:
 notes/
 ╞══════════════════◆
 │
-├─≣ 2026-08.md
-│  ├─● 1 note
-│  ├─● 2 todos
-│  └─● 1 resource
-│
-└─≣ 2026-07.md
-   ├─● 12 notes
-   ├─● 2 todos
-   └─● 15 resources
+└─≣ 2026-08.md
+   ├─● 1 note
+   └─● 1 todo
 ```
 
 ## Scripts
@@ -226,7 +235,6 @@ From this directory (`projects/grimoire/`):
 ```bash
 python3 tests/grim-scry/test.py
 python3 tests/grim-repo/test.py
-python3 tests/grim-forge/test.py
 ```
 
 Standard-library `unittest` only. Spell scripts load by path via `[tests/load_script.py](tests/load_script.py)`.
