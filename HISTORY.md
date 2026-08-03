@@ -1,14 +1,18 @@
 # History
 
-Grimoire is a spellbook of at-a-glance agent skills — Grim Scry (conceptual shape), Grim Repo (nested git census), and Grim Forge (historical ledger). This file records how the spellbook evolved from a single scry spell into a three-spell toolkit with script-backed evidence and a simplified distill-and-template workflow.
+Grimoire is a spellbook of at-a-glance agent skills — Grim Scry (conceptual shape), Grim Repo (nested git census), Grim Forge (historical ledger), and Grim Notes (daily notes capture). This file records how the spellbook evolved from a single scry spell into a four-spell toolkit with script-backed evidence and a simplified distill-and-template workflow.
 
 ## Story
 
-From a July 2026 rename off "skillit" through hyphenated spell ids, a brief grim-weave experiment, and a July refactor that traded verbose skill contracts for template-driven distill workflows.
+From a July 2026 rename off "skillit" through hyphenated spell ids, a brief grim-weave experiment, a July refactor that traded verbose skill contracts for template-driven distill workflows, and an August addition of grim-notes for append-only daily capture.
 
 ### Origins
 
 The repo began July 6, 2026 as a skills collection (`cb12339`), renamed to skillit the next day (`786ce80`) and grimoire on July 8 (`451261f`). Grim Scry arrived July 20 (`a031701`) as the first spell — canonical repo models distilled into session viewports. `install.sh` copied spells into invoking `.agents/skills/` (`0b5c1c5`); README framed spellbook axioms and roadmap (`82c236b`).
+
+## 2026-08-02
+
+grim-notes arrives as the fourth spell (`7e005c0`): classify paste into notes, todos, and resources; append into `notes/YYYY-MM.md` under today's day heading; emit delta or status viewports. README documents the spell (`433858e`); throneroom example run lands (`c65fa0e`); example run template switches to brace placeholders (`16187a1`).
 
 ## 2026-07-31
 
