@@ -22,9 +22,7 @@ grimoire/
 
 ---
 
-Grimoire is a spellbook of at-a-glance agent skills.
-
-Grimoire spells put evidence into the session: bounded discovery, live state, and durable artifacts. Cast from within an agent session. Reason with the results.
+Grimoire is a spellbook of at-a-glance agent skills. Each spell distills one aspect of your workspace into a compact viewport for you, and your agents, to reason about.
 
 | Spell | Intent |
 | --- | --- |
