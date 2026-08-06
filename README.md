@@ -194,13 +194,30 @@ Sample runs: [examples/](examples/).
 
 ## Install
 
-From the project that should receive the spells:
+Via [skills.sh](https://skills.sh/) / the skills CLI:
+
+```bash
+npx skills add matthewlsawyer/grimoire
+```
+
+Options:
+
+```bash
+# list spells without installing
+npx skills add matthewlsawyer/grimoire --list
+
+# one spell
+npx skills add matthewlsawyer/grimoire --skill grim-scry
+
+# global (all agents on this machine)
+npx skills add matthewlsawyer/grimoire -g
+```
+
+Local copy into the invoking project's `.agents/skills/`:
 
 ```bash
 /path/to/grimoire/install.sh
 ```
-
-Copies each skill into `.agents/skills/{skill-name}/` under the invoking directory.
 
 ## Scripts
 
